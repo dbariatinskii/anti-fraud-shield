@@ -440,6 +440,36 @@ html, body {
   backdrop-filter: none;
 }
 
+/* Инструкция на оверлее практики */
+.training-instruction {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  z-index: 10;
+}
+
+.training-instruction__icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.training-instruction__text {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.training-instruction__subtext {
+  font-size: 14px;
+  color: var(--color-text-dim);
+}
+
 .training-progress {
   position: absolute;
   bottom: 0;

@@ -268,13 +268,14 @@ eventBus.on('training:intro:complete', () => {
   trainingOverlay.start(practiceCards);
 
   let practiceIndex = 0;
-  const spawnPracticeCard = () => {
+  const spawnPracticeCard = (visible = false) => {
     if (practiceIndex >= practiceCards.length) return;
     const data = practiceCards[practiceIndex];
     const card = cardPool.acquire(data);
     if (card) {
       card.speed = 60;
-      card.y = -80;
+      // Первая карточка — сразу в видимой зоне, остальные — сверху
+      card.y = visible ? 0 : -80;
       card.element.style.transform = `translateY(${card.y}px)`;
       card.element.style.left = `${30 + (practiceIndex % 5) * 10}%`;
       card.element.style.display = 'flex';
@@ -292,7 +293,8 @@ eventBus.on('training:intro:complete', () => {
     }
   }, 3000);
 
-  spawnPracticeCard();
+  // Первая карточка — сразу в видимой зоне
+  spawnPracticeCard(true);
 
   trainingClickHandler = (e: Event) => {
     const target = e.target as HTMLElement;

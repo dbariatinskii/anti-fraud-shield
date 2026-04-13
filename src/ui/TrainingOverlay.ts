@@ -28,6 +28,11 @@ export class TrainingOverlay {
     this.element.className = 'screen training-overlay--active';
     this.element.style.display = 'none';
     this.element.innerHTML = `
+      <div class="training-instruction" id="training-instruction">
+        <div class="training-instruction__icon">👆</div>
+        <div class="training-instruction__text">Кликай по подозрительным транзакциям</div>
+        <div class="training-instruction__subtext">Наведи на карточку для подсказки</div>
+      </div>
       <div class="training-progress" id="training-progress"></div>
       <div class="training-tooltip" id="training-tooltip"></div>
     `;
@@ -45,6 +50,15 @@ export class TrainingOverlay {
     this.patternStats = {};
     this.element.style.display = 'flex';
     this.updateProgress();
+
+    // Скрыть инструкцию через 4 секунды
+    const instruction = this.element.querySelector('#training-instruction') as HTMLElement | null;
+    if (instruction) {
+      setTimeout(() => {
+        instruction.style.opacity = '0';
+        setTimeout(() => { instruction.style.display = 'none'; }, 500);
+      }, 4000);
+    }
 
     this.cardContainer.addEventListener('mouseenter', this.handleHover, true);
     this.cardContainer.addEventListener('mouseleave', this.handleHoverLeave, true);
