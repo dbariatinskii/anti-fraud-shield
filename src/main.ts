@@ -14,6 +14,13 @@ import { MenuScreen } from '@/ui/MenuScreen';
 import { GameOverScreen } from '@/ui/GameOverScreen';
 import { GameMode, GameResult, CardElement } from '@/types/game';
 import { transactionTemplates } from '@/config/transactions';
+import { TrainingScenario } from '@/entities/TrainingScenario';
+import { TrainingIntro } from '@/ui/TrainingIntro';
+import { TrainingOverlay } from '@/ui/TrainingOverlay';
+import { TrainingSummary } from '@/ui/TrainingSummary';
+import { Leaderboard } from '@/systems/Leaderboard';
+import { LeaderboardScreen } from '@/ui/LeaderboardScreen';
+import { PauseOverlay } from '@/core/PauseOverlay';
 import '@/styles/main.css';
 
 // === Инициализация DOM ===
@@ -45,6 +52,19 @@ const menuScreen = new MenuScreen(eventBus, stateMachine, uiLayer);
 const gameOverScreen = new GameOverScreen(eventBus, stateMachine, uiLayer);
 const hud = new HUD(eventBus, timer, hudLayer);
 hud.init();
+
+// === Обучение ===
+const trainingScenario = new TrainingScenario();
+const trainingIntro = new TrainingIntro(eventBus, uiLayer);
+const trainingOverlay = new TrainingOverlay(eventBus, uiLayer, cardContainer);
+const trainingSummary = new TrainingSummary(eventBus, uiLayer);
+
+// === Лидерборд ===
+const leaderboard = new Leaderboard();
+const leaderboardScreen = new LeaderboardScreen(eventBus, stateMachine, leaderboard, uiLayer);
+
+// === Пауза ===
+const pauseOverlay = new PauseOverlay(eventBus, stateMachine, uiLayer);
 
 // === Зона решения (визуальная полоса внизу игрового поля) ===
 const decisionZone = document.createElement('div');
@@ -116,16 +136,14 @@ eventBus.on('game:state', (mode) => {
       gameOverScreen.hide();
       hud.show();
 
-      // Resume из паузы или новый запуск?
       if (isPaused) {
-        // Возобновляем paused-сессию
         isPaused = false;
         timer.resume();
         inputSystem.init();
+        pauseOverlay.hide();
         return;
       }
 
-      // Полный запуск новой игры
       inputSystem.init();
       timer.start(60);
       gameLoop.start();
@@ -150,29 +168,36 @@ eventBus.on('game:state', (mode) => {
         time: timer.getTotal(),
         shield: state.shield,
       };
+
+      leaderboard.save({
+        score: state.score,
+        accuracy: state.accuracy,
+        shield: state.shield,
+        time: timer.getTotal(),
+      });
+
       gameOverScreen.show(result);
       break;
     }
 
-    // === Заглушки для будущих режимов ===
     case GameMode.Training:
-      // TODO: Реализовать режим обучения (Этап 2 плана)
-      // - Фиксированная низкая скорость
-      // - Подсказки при наведении
-      // - Прогресс-бар из 20 транзакций
-      // - Финальная сводка с паттернами
-      console.warn('[TrainingMode] Not implemented yet');
-      stateMachine.transition(GameMode.Menu);
+      menuScreen.hide();
+      gameOverScreen.hide();
+      hud.hide();
+      trainingIntro.start(trainingScenario.getIntroSteps());
       break;
 
     case GameMode.Leaderboard:
-      // TODO: Реализовать таблицу рекордов (Этап 2 плана)
-      // - localStorage хранилище
-      // - Сортировка по очкам/точности
-      // - Фильтрация по периодам
-      // - Экспорт карточки результата
-      console.warn('[Leaderboard] Not implemented yet');
-      stateMachine.transition(GameMode.Menu);
+      menuScreen.hide();
+      gameOverScreen.hide();
+      hud.hide();
+      leaderboardScreen.show();
+      break;
+
+    case GameMode.Paused:
+      isPaused = true;
+      timer.pause();
+      pauseOverlay.show();
       break;
   }
 });
@@ -240,6 +265,87 @@ function flashScreen(type: 'error' | 'success'): void {
   setTimeout(() => flash.remove(), 400);
 }
 
+// === Обработка событий обучения ===
+eventBus.on('training:intro:complete', () => {
+  const practiceCards = trainingScenario.getPracticeCards();
+  trainingOverlay.start(practiceCards);
+  inputSystem.init();
+
+  let practiceIndex = 0;
+  const spawnPracticeCard = () => {
+    if (practiceIndex >= practiceCards.length) return;
+    const data = practiceCards[practiceIndex];
+    const card = cardPool.acquire(data);
+    if (card) {
+      card.speed = 60;
+      card.y = -80;
+      card.element.style.transform = `translateY(${card.y}px)`;
+      card.element.style.left = `${30 + (practiceIndex % 5) * 10}%`;
+      card.element.style.display = 'flex';
+      card.element.className = `card card--${data.type} card--falling`;
+      practiceIndex++;
+    }
+  };
+
+  const practiceInterval = setInterval(() => {
+    if (practiceIndex < practiceCards.length) {
+      spawnPracticeCard();
+    } else {
+      clearInterval(practiceInterval);
+    }
+  }, 3000);
+
+  spawnPracticeCard();
+
+  const trainingClickHandler = (e: Event) => {
+    const target = e.target as HTMLElement;
+    const cardEl = target.closest('.card') as HTMLElement | null;
+    if (!cardEl || !cardEl.dataset.cardId) return;
+    const card = cardPool.findById(cardEl.dataset.cardId);
+    if (!card || card.processed) return;
+    card.processed = true;
+
+    const isCorrect = card.type === 'risk';
+    trainingOverlay.recordStep(
+      { id: card.id, type: card.type, icon: card.type === 'risk' ? 'alert' : 'card', amount: 0, location: '', riskFactors: [] },
+      isCorrect
+    );
+
+    if (isCorrect) {
+      card.element.className = 'card card--blocked';
+    } else {
+      card.element.className = 'card card--error';
+      flashScreen('error');
+    }
+
+    setTimeout(() => { cardPool.release(card); }, 500);
+  };
+
+  cardContainer.addEventListener('click', trainingClickHandler);
+  (window as any).__trainingClickHandler = trainingClickHandler;
+  (window as any).__practiceInterval = practiceInterval;
+});
+
+eventBus.on('training:complete', ({ correct, mistakes, patternStats }) => {
+  cardContainer.removeEventListener('click', (window as any).__trainingClickHandler);
+  clearInterval((window as any).__practiceInterval);
+  inputSystem.destroy();
+  cardPool.getActive().forEach((c) => cardPool.release(c));
+  trainingOverlay.finish();
+  trainingSummary.show(correct, mistakes, patternStats);
+});
+
 // === Запуск — показываем главное меню
 // GameStateMachine уже в состоянии Menu по умолчанию, просто показываем UI
 menuScreen.show();
+
+// === Клавиша Escape для паузы ===
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (stateMachine.getCurrent() === GameMode.Game) {
+      stateMachine.transition(GameMode.Paused);
+    } else if (stateMachine.getCurrent() === GameMode.Paused) {
+      stateMachine.transition(GameMode.Game);
+    }
+  }
+});
