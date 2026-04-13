@@ -350,12 +350,9 @@ eventBus.on('training:intro:complete', () => {
 
   // Обработка пропущенных карточек (ушли за decision zone без клика)
   const trainingPassHandler = (card: CardElement) => {
-    // Только карточки из practiceCards (id начинается с 'p-')
     if (!card.id.startsWith('p-')) return;
-    if (card.processed) return;
-    card.processed = true;
 
-    // В обучении: пропуск нормы = правильно, пропуск риска = ошибка
+    // Пропуск нормы = правильно, пропуск риска = ошибка
     const isCorrect = card.type === 'norm';
     trainingOverlay.recordStep(
       { id: card.id, type: card.type, icon: card.type === 'risk' ? 'alert' : 'card', amount: 0, location: '', riskFactors: [] },
