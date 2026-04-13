@@ -263,6 +263,7 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.show();
+      inputSystem.init();
       scoreManager.reset();
       timer.start(60);
       gameLoop.start();
@@ -270,6 +271,7 @@ eventBus.on('game:state', (mode) => {
     }
 
     case GameMode.DuelCompare: {
+      inputSystem.destroy();
       const state = duelManager.getState();
       const result: DuelPlayerResult = {
         score: scoreManager.getState().score,
