@@ -271,6 +271,7 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.hide();
+      duelManager.reset();
       duelSetupScreen.show();
       break;
 
