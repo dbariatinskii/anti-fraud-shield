@@ -43,7 +43,7 @@ const spawner = new CardSpawner(eventBus, cardPool, generator);
 
 // === Системы ===
 const inputSystem = new InputSystem(eventBus, cardPool, cardContainer);
-const scoreManager = new ScoreManager(eventBus);
+const scoreManager = new ScoreManager(eventBus, stateMachine);
 const difficultyEngine = new DifficultyEngine(eventBus);
 const particleCanvas = new ParticleCanvas('particle-layer');
 
@@ -184,19 +184,23 @@ eventBus.on('game:state', (mode) => {
       hud.hide();
 
       const state = scoreManager.getState();
+      const elapsed = Math.round(timer.getTotal() - timer.getRemaining());
       const result: GameResult = {
         score: state.score,
         accuracy: state.accuracy,
-        time: timer.getTotal(),
+        time: elapsed,
         shield: state.shield,
       };
 
-      leaderboard.save({
-        score: state.score,
-        accuracy: state.accuracy,
-        shield: state.shield,
-        time: Math.round(timer.getTotal() - timer.getRemaining()),
-      });
+      // Сохраняем только результаты классической игры (score > 0)
+      if (state.score > 0) {
+        leaderboard.save({
+          score: state.score,
+          accuracy: state.accuracy,
+          shield: state.shield,
+          time: elapsed,
+        });
+      }
 
       gameOverScreen.show(result);
       break;

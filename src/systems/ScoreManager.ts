@@ -1,5 +1,6 @@
 import { EventBus } from '@/core/EventBus';
-import { CardElement } from '@/types/game';
+import { GameStateMachine } from '@/core/GameStateMachine';
+import { CardElement, GameMode } from '@/types/game';
 
 /** Менеджер очков и щита */
 export class ScoreManager {
@@ -8,7 +9,10 @@ export class ScoreManager {
   private correctActions = 0;
   private totalActions = 0;
 
-  constructor(private eventBus: EventBus) {
+  constructor(
+    private eventBus: EventBus,
+    private stateMachine: GameStateMachine,
+  ) {
     this.subscribe();
   }
 
@@ -35,6 +39,9 @@ export class ScoreManager {
 
   private subscribe(): void {
     this.eventBus.on('card:blocked', (card: CardElement) => {
+      // Работаем только в режиме классической игры
+      if (this.stateMachine.getCurrent() !== GameMode.Game) return;
+
       this.totalActions++;
 
       if (card.type === 'risk') {
@@ -50,6 +57,9 @@ export class ScoreManager {
     });
 
     this.eventBus.on('card:passed', (card: CardElement) => {
+      // Работаем только в режиме классической игры
+      if (this.stateMachine.getCurrent() !== GameMode.Game) return;
+
       this.totalActions++;
 
       if (card.type === 'norm') {
