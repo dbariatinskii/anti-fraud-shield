@@ -8,7 +8,7 @@ const VALID_TRANSITIONS: Record<GameMode, GameMode[]> = {
   [GameMode.Game]: [GameMode.GameOver, GameMode.Paused],
   [GameMode.Paused]: [GameMode.Game, GameMode.Menu],
   [GameMode.GameOver]: [GameMode.ClassicInit, GameMode.Menu, GameMode.Leaderboard],
-  [GameMode.Training]: [GameMode.GameOver, GameMode.Menu, GameMode.ClassicInit],
+  [GameMode.Training]: [GameMode.GameOver, GameMode.Menu, GameMode.ClassicInit, GameMode.Training],
   [GameMode.Leaderboard]: [GameMode.Menu],
 };
 
