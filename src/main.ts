@@ -72,8 +72,10 @@ decisionZone.className = 'decision-zone';
 gameField.appendChild(decisionZone);
 const DECISION_ZONE_HEIGHT = 40;
 
-// === Переменные для отслеживания paused ===
+// === Переменные для отслеживания paused и обучения ===
 let isPaused = false;
+let trainingClickHandler: ((e: Event) => void) | null = null;
+let practiceInterval: ReturnType<typeof setInterval> | null = null;
 
 // === Игровой цикл ===
 const gameLoop = new GameLoop(update, render);
@@ -152,6 +154,7 @@ eventBus.on('game:state', (mode) => {
     case GameMode.Paused:
       isPaused = true;
       timer.pause();
+      pauseOverlay.show();
       break;
 
     case GameMode.GameOver: {
@@ -173,7 +176,7 @@ eventBus.on('game:state', (mode) => {
         score: state.score,
         accuracy: state.accuracy,
         shield: state.shield,
-        time: timer.getTotal(),
+        time: Math.round(timer.getTotal() - timer.getRemaining()),
       });
 
       gameOverScreen.show(result);
@@ -192,12 +195,6 @@ eventBus.on('game:state', (mode) => {
       gameOverScreen.hide();
       hud.hide();
       leaderboardScreen.show();
-      break;
-
-    case GameMode.Paused:
-      isPaused = true;
-      timer.pause();
-      pauseOverlay.show();
       break;
   }
 });
@@ -269,7 +266,6 @@ function flashScreen(type: 'error' | 'success'): void {
 eventBus.on('training:intro:complete', () => {
   const practiceCards = trainingScenario.getPracticeCards();
   trainingOverlay.start(practiceCards);
-  inputSystem.init();
 
   let practiceIndex = 0;
   const spawnPracticeCard = () => {
@@ -287,17 +283,18 @@ eventBus.on('training:intro:complete', () => {
     }
   };
 
-  const practiceInterval = setInterval(() => {
+  practiceInterval = setInterval(() => {
     if (practiceIndex < practiceCards.length) {
       spawnPracticeCard();
     } else {
-      clearInterval(practiceInterval);
+      clearInterval(practiceInterval!);
+      practiceInterval = null;
     }
   }, 3000);
 
   spawnPracticeCard();
 
-  const trainingClickHandler = (e: Event) => {
+  trainingClickHandler = (e: Event) => {
     const target = e.target as HTMLElement;
     const cardEl = target.closest('.card') as HTMLElement | null;
     if (!cardEl || !cardEl.dataset.cardId) return;
@@ -322,16 +319,20 @@ eventBus.on('training:intro:complete', () => {
   };
 
   cardContainer.addEventListener('click', trainingClickHandler);
-  (window as any).__trainingClickHandler = trainingClickHandler;
-  (window as any).__practiceInterval = practiceInterval;
 });
 
 eventBus.on('training:complete', ({ correct, mistakes, patternStats }) => {
-  cardContainer.removeEventListener('click', (window as any).__trainingClickHandler);
-  clearInterval((window as any).__practiceInterval);
-  inputSystem.destroy();
+  // Очистка — НЕ вызываем trainingOverlay.finish() чтобы избежать рекурсии
+  // finish() уже был вызван ДО отправки события
+  if (trainingClickHandler) {
+    cardContainer.removeEventListener('click', trainingClickHandler);
+    trainingClickHandler = null;
+  }
+  if (practiceInterval) {
+    clearInterval(practiceInterval);
+    practiceInterval = null;
+  }
   cardPool.getActive().forEach((c) => cardPool.release(c));
-  trainingOverlay.finish();
   trainingSummary.show(correct, mistakes, patternStats);
 });
 

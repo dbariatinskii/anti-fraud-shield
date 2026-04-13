@@ -25,10 +25,17 @@ export class TrainingSummary {
     const total = correct + mistakes;
     const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
     statsEl.innerHTML = `<div class="stat"><span class="stat__value">${correct}</span><span class="stat__label">Правильно</span></div><div class="stat"><span class="stat__value">${mistakes}</span><span class="stat__label">Ошибки</span></div><div class="stat"><span class="stat__value">${accuracy}%</span><span class="stat__label">Точность</span></div>`;
+
+    const iconEmoji: Record<string, string> = {
+      globe: '🌐', clock: '🕐', zap: '⚡', alert: '⚠️',
+      card: '💳', shopping: '🛒', phone: '📱', home: '🏠',
+    };
+
     const rows = Object.entries(patternStats).map(([p, s]) => {
       const pct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
       const color = pct >= 80 ? 'var(--color-safe)' : pct >= 50 ? 'var(--color-warning)' : 'var(--color-risk)';
-      return `<div class="training-pattern-row"><span>${p}</span><span style="color:${color}">${s.correct}/${s.total} (${pct}%)</span></div>`;
+      const emoji = iconEmoji[p] || p;
+      return `<div class="training-pattern-row"><span>${emoji}</span><span style="color:${color}">${s.correct}/${s.total} (${pct}%)</span></div>`;
     }).join('');
     patternsEl.innerHTML = `<div class="training-patterns-list">${rows}</div>`;
     this.element.style.display = 'flex';
