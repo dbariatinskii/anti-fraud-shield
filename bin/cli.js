@@ -3,7 +3,7 @@ import { createRequire } from 'module'; const require = createRequire(import.met
 
 // bin/cli.mjs
 import { createServer } from "node:http";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -32,17 +32,22 @@ Anti-Fraud Shield \u2014 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u043D\u0430\
 }
 if (staticFlag) {
   console.log("\u{1F4E6} \u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F single HTML...");
-  if (!existsSync(STATIC_DIR)) {
-    console.log("  \u2192 \u0421\u0431\u043E\u0440\u043A\u0430 \u043F\u0440\u043E\u0435\u043A\u0442\u0430...");
-    execSync("npm run build", { cwd: ROOT_DIR, stdio: "inherit" });
-  }
-  execSync("node bin/build-static.mjs", { cwd: ROOT_DIR, stdio: "inherit" });
-  const htmlPath = resolve(DIST_SINGLE_DIR, "anti-fraud-shield.html");
-  if (existsSync(htmlPath)) {
-    console.log(`\u2705 \u0424\u0430\u0439\u043B \u0441\u043E\u0437\u0434\u0430\u043D: ${htmlPath}`);
-    open(htmlPath);
-  } else {
-    console.error("\u274C \u041E\u0448\u0438\u0431\u043A\u0430 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0438 single HTML");
+  try {
+    if (!existsSync(STATIC_DIR)) {
+      console.log("  \u2192 \u0421\u0431\u043E\u0440\u043A\u0430 \u043F\u0440\u043E\u0435\u043A\u0442\u0430...");
+      execSync("npm run build", { cwd: ROOT_DIR, stdio: "inherit" });
+    }
+    execSync("node bin/build-static.mjs", { cwd: ROOT_DIR, stdio: "inherit" });
+    const htmlPath = resolve(DIST_SINGLE_DIR, "anti-fraud-shield.html");
+    if (existsSync(htmlPath)) {
+      console.log(`\u2705 \u0424\u0430\u0439\u043B \u0441\u043E\u0437\u0434\u0430\u043D: ${htmlPath}`);
+      open(htmlPath);
+    } else {
+      console.error("\u274C \u041E\u0448\u0438\u0431\u043A\u0430 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0438 single HTML");
+      process.exit(1);
+    }
+  } catch {
+    console.error("\u274C \u041E\u0448\u0438\u0431\u043A\u0430 \u043F\u0440\u0438 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0438 single HTML");
     process.exit(1);
   }
   process.exit(0);
@@ -56,7 +61,11 @@ if (!existsSync(STATIC_DIR)) {
     process.exit(1);
   }
 }
-function findFreePort(startPort) {
+function findFreePort(startPort, attempts = 0) {
+  const MAX_ATTEMPTS = 100;
+  if (attempts >= MAX_ATTEMPTS) {
+    throw new Error(`\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043D\u0430\u0439\u0442\u0438 \u0441\u0432\u043E\u0431\u043E\u0434\u043D\u044B\u0439 \u043F\u043E\u0440\u0442 \u043F\u043E\u0441\u043B\u0435 ${MAX_ATTEMPTS} \u043F\u043E\u043F\u044B\u0442\u043E\u043A`);
+  }
   return new Promise((resolve2, reject) => {
     const server = createServer();
     server.listen(startPort, () => {
@@ -64,7 +73,7 @@ function findFreePort(startPort) {
       server.close(() => resolve2(freePort));
     });
     server.on("error", () => {
-      findFreePort(startPort + 1).then(resolve2).catch(reject);
+      findFreePort(startPort + 1, attempts + 1).then(resolve2).catch(reject);
     });
   });
 }

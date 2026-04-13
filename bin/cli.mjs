@@ -11,7 +11,7 @@
  */
 
 import { createServer } from 'node:http';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -48,21 +48,26 @@ Anti-Fraud Shield — браузерная мини-игра
 if (staticFlag) {
   console.log('📦 Генерация single HTML...');
 
-  // Проверяем что static/ существует
-  if (!existsSync(STATIC_DIR)) {
-    console.log('  → Сборка проекта...');
-    execSync('npm run build', { cwd: ROOT_DIR, stdio: 'inherit' });
-  }
+  try {
+    // Проверяем что static/ существует
+    if (!existsSync(STATIC_DIR)) {
+      console.log('  → Сборка проекта...');
+      execSync('npm run build', { cwd: ROOT_DIR, stdio: 'inherit' });
+    }
 
-  // Запускаем генератор
-  execSync('node bin/build-static.mjs', { cwd: ROOT_DIR, stdio: 'inherit' });
+    // Запускаем генератор
+    execSync('node bin/build-static.mjs', { cwd: ROOT_DIR, stdio: 'inherit' });
 
-  const htmlPath = resolve(DIST_SINGLE_DIR, 'anti-fraud-shield.html');
-  if (existsSync(htmlPath)) {
-    console.log(`✅ Файл создан: ${htmlPath}`);
-    open(htmlPath);
-  } else {
-    console.error('❌ Ошибка генерации single HTML');
+    const htmlPath = resolve(DIST_SINGLE_DIR, 'anti-fraud-shield.html');
+    if (existsSync(htmlPath)) {
+      console.log(`✅ Файл создан: ${htmlPath}`);
+      open(htmlPath);
+    } else {
+      console.error('❌ Ошибка генерации single HTML');
+      process.exit(1);
+    }
+  } catch {
+    console.error('❌ Ошибка при генерации single HTML');
     process.exit(1);
   }
   process.exit(0);
@@ -80,8 +85,12 @@ if (!existsSync(STATIC_DIR)) {
   }
 }
 
-// Ищем свободный порт
-function findFreePort(startPort) {
+// Ищем свободный порт (максимум 100 попыток)
+function findFreePort(startPort, attempts = 0) {
+  const MAX_ATTEMPTS = 100;
+  if (attempts >= MAX_ATTEMPTS) {
+    throw new Error(`Не удалось найти свободный порт после ${MAX_ATTEMPTS} попыток`);
+  }
   return new Promise((resolve, reject) => {
     const server = createServer();
     server.listen(startPort, () => {
@@ -90,7 +99,7 @@ function findFreePort(startPort) {
     });
     server.on('error', () => {
       // Порт занят, пробуем следующий
-      findFreePort(startPort + 1).then(resolve).catch(reject);
+      findFreePort(startPort + 1, attempts + 1).then(resolve).catch(reject);
     });
   });
 }
