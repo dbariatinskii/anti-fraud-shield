@@ -6,7 +6,7 @@ import { getIconInfo } from '@/config/icons';
 export class CardPool {
   private pool: CardElement[] = [];
   private container!: HTMLElement;
-  private readonly POOL_SIZE = 20;
+  private readonly POOL_SIZE = 40;
 
   /** Инициализировать пул DOM-элементами */
   init(container: HTMLElement): void {
