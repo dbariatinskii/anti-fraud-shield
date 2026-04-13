@@ -285,6 +285,11 @@ eventBus.on('shield:changed', ({ value }) => {
   }
 });
 
+// === Кнопка паузы в HUD ===
+eventBus.on('game:paused', () => {
+  stateMachine.transition(GameMode.Paused);
+});
+
 // === Вспомогательные ===
 function flashScreen(type: 'error' | 'success'): void {
   const flash = document.createElement('div');
