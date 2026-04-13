@@ -192,6 +192,7 @@ eventBus.on('game:state', (mode) => {
 
       scoreManager.reset();
       timer.reset();
+      hud.reset();
       isPaused = false;
       cardPool.getActive().forEach((c) => cardPool.release(c));
       stateMachine.transition(GameMode.Game);
