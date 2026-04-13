@@ -272,3 +272,143 @@ html, body {
   pointer-events: none;
   animation: screenFlash var(--transition-normal) forwards;
 }
+
+/* ===== HUD ===== */
+#hud-layer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-unit) calc(var(--spacing-unit) * 2);
+}
+
+#hud-layer:not(.visible) {
+  display: none;
+}
+
+.hud__left,
+.hud__right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-unit);
+}
+
+.hud__shield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud__shield-bar {
+  width: 120px;
+  height: 8px;
+  background: var(--color-surface-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hud__shield-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--color-safe);
+  border-radius: 4px;
+  transition: width var(--transition-fast), background var(--transition-fast);
+}
+
+.hud__shield-icon {
+  font-size: 20px;
+}
+
+.hud__score {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.hud__timer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+}
+
+.hud__timer-circle {
+  width: 44px;
+  height: 44px;
+  position: absolute;
+}
+
+.hud__timer-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  z-index: 1;
+}
+
+.hud__timer-text.pulse {
+  animation: pulse 1s infinite;
+}
+
+/* ===== Экраны (меню, game over) ===== */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.95);
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.screen__content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 3);
+}
+
+.screen__title {
+  font-size: 64px;
+}
+
+.screen__heading {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.screen__actions {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 2);
+  min-width: 240px;
+}
+
+.screen__stats {
+  display: flex;
+  gap: calc(var(--spacing-unit) * 4);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat__value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-safe);
+}
+
+.stat__label {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
