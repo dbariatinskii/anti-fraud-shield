@@ -401,7 +401,39 @@ eventBus.on('shield:changed', ({ value }) => {
   if (value <= 0) {
     const mode = stateMachine.getCurrent();
     if (mode === GameMode.DuelGame) {
-      stateMachine.transition(GameMode.DuelCompare);
+      const state = duelManager.getState();
+      gameLoop.stop();
+      inputSystem.destroy();
+      hud.hide();
+      
+      // Записать результат текущего игрока (0 очков если щит = 0)
+      const result: DuelPlayerResult = {
+        score: scoreManager.getState().score,
+        accuracy: scoreManager.getState().accuracy,
+        missedRisks: scoreManager.getMissedRisks(),
+      };
+      duelManager.recordResult(state.currentPlayer, result);
+      
+      if (state.currentPlayer === 1) {
+        // Игрок 1 проиграл — переход к Игроку 2
+        duelManager.nextRound();
+        stateMachine.transition(GameMode.DuelRoundStart);
+      } else {
+        // Игрок 2 проиграл — сравнить результаты
+        const p1 = duelManager.getState().roundResults.player1!;
+        const p2 = duelManager.getState().roundResults.player2!;
+        const winner = duelManager.determineWinner();
+        if (winner !== 0) duelManager.recordWin(winner);
+        
+        if (duelManager.isSeriesOver()) {
+          const seriesScore = duelManager.getSeriesScore();
+          const seriesWinner = seriesScore.p1 > seriesScore.p2 ? 1 : 2;
+          duelWinnerScreen.show(seriesWinner, seriesScore);
+          stateMachine.transition(GameMode.DuelWinner);
+        } else {
+          duelCompareScreen.show(p1, p2);
+        }
+      }
     } else {
       stateMachine.transition(GameMode.GameOver);
     }
