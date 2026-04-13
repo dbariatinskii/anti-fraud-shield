@@ -60,6 +60,17 @@ export class HUD {
     this.element.classList.add('visible');
   }
 
+  /** Сбросить отображение HUD к начальным значениям */
+  reset(): void {
+    this.shieldBar.style.width = '100%';
+    this.shieldBar.style.background = 'var(--color-safe)';
+    this.scoreEl.textContent = '0';
+    this.timerEl.textContent = '60';
+    this.timerCircle.style.stroke = 'var(--color-safe)';
+    this.timerCircle.style.strokeDashoffset = '0';
+    this.timerEl.classList.remove('pulse');
+  }
+
   /** Скрыть HUD */
   hide(): void {
     this.element.classList.remove('visible');

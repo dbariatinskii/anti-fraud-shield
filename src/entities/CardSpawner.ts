@@ -38,6 +38,12 @@ export class CardSpawner {
     return this.spawnInterval;
   }
 
+  /** Сбросить спавнер */
+  reset(): void {
+    this.spawnTimer = 0;
+    this.spawnInterval = 2.0;
+  }
+
   /** Принудительный спавн */
   spawn(): void {
     // Не генерировать карточку если пул исчерпан — экономим ресурсы

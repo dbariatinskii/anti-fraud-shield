@@ -288,8 +288,11 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.show();
+      hud.reset();
       inputSystem.init();
       scoreManager.reset();
+      spawner.reset();
+      cardPool.getActive().forEach((c) => cardPool.release(c));
       timer.start(60);
       gameLoop.start();
       break;
