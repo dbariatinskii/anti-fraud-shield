@@ -1,11 +1,16 @@
 import { EventBus } from '@/core/EventBus';
+import { GameStateMachine } from '@/core/GameStateMachine';
 import { GameMode } from '@/types/game';
 
 export class TrainingSummary {
   private element!: HTMLElement;
   private container: HTMLElement;
-  constructor(private eventBus: EventBus, uiLayer: HTMLElement) { this.container = uiLayer; this.build(); }
+  constructor(private eventBus: EventBus, private stateMachine: GameStateMachine, uiLayer: HTMLElement) {
+    this.container = uiLayer;
+    this.build();
+  }
   private build(): void {
+    if (!this.container) return;
     this.element = document.createElement('div');
     this.element.id = 'training-summary';
     this.element.className = 'screen';
@@ -15,9 +20,9 @@ export class TrainingSummary {
     this.bindEvents();
   }
   private bindEvents(): void {
-    this.element.querySelector('#ts-retry')?.addEventListener('click', () => { this.hide(); this.eventBus.emit('game:state', GameMode.Training); });
-    this.element.querySelector('#ts-classic')?.addEventListener('click', () => { this.hide(); this.eventBus.emit('game:state', GameMode.ClassicInit); });
-    this.element.querySelector('#ts-menu')?.addEventListener('click', () => { this.hide(); this.eventBus.emit('game:state', GameMode.Menu); });
+    this.element.querySelector('#ts-retry')?.addEventListener('click', () => { this.hide(); this.stateMachine.transition(GameMode.Training); });
+    this.element.querySelector('#ts-classic')?.addEventListener('click', () => { this.hide(); this.stateMachine.transition(GameMode.ClassicInit); });
+    this.element.querySelector('#ts-menu')?.addEventListener('click', () => { this.hide(); this.stateMachine.transition(GameMode.Menu); });
   }
   show(correct: number, mistakes: number, patternStats: Record<string, { correct: number; total: number }>): void {
     const statsEl = this.element.querySelector('#ts-stats')!;

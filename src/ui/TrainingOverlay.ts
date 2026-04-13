@@ -124,7 +124,7 @@ export class TrainingOverlay {
   private handleHover = (e: Event): void => {
     const target = e.target as HTMLElement;
     const cardEl = target.closest('.card');
-    // Приведение к HTMLElement для доступа к dataset
+    if (!cardEl) return;
     const cardHtmlEl = cardEl as HTMLElement;
     if (!cardHtmlEl.dataset.cardId) return;
 

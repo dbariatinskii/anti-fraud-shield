@@ -57,7 +57,7 @@ hud.init();
 const trainingScenario = new TrainingScenario();
 const trainingIntro = new TrainingIntro(eventBus, uiLayer);
 const trainingOverlay = new TrainingOverlay(eventBus, uiLayer, cardContainer);
-const trainingSummary = new TrainingSummary(eventBus, uiLayer);
+const trainingSummary = new TrainingSummary(eventBus, stateMachine, uiLayer);
 
 // === Лидерборд ===
 const leaderboard = new Leaderboard();
@@ -147,6 +147,11 @@ eventBus.on('game:state', (mode) => {
       break;
 
     case GameMode.ClassicInit:
+      // Скрыть все UI обучения
+      trainingSummary.hide();
+      trainingOverlay.hide();
+      trainingIntro.hide();
+
       scoreManager.reset();
       timer.reset();
       isPaused = false;
