@@ -2,11 +2,10 @@ import { DuelPlayerResult, DuelState } from '@/types/duel';
 
 /**
  * Менеджер управления серией дуэли.
- * Отвечает за переключение игроков, определение победителя,
- * подсчёт побед в серии и проверку завершения серии.
+ * Отвечает за переключение игроков, подсчёт побед и определение победителя раунда.
  */
 export class DuelManager {
-  private state!: DuelState;
+  private state: DuelState;
 
   constructor() {
     this.reset();
