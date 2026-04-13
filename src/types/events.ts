@@ -1,5 +1,6 @@
 import { GameMode, CardElement, ScoreEvent, GameResult } from '@/types/game';
 import { LeaderboardEntry } from '@/types/leaderboard';
+import { DuelPlayerResult, DuelState } from '@/types/duel';
 
 /** Строго типизированная карта событий */
 export interface GameEvents {
@@ -27,6 +28,10 @@ export interface GameEvents {
   // Пауза
   'game:paused': void;
   'game:resumed': void;
+
+  // Дуэль
+  'duel:round:complete': { player: 1 | 2; result: DuelPlayerResult };
+  'duel:series:complete': DuelState;
 
   // Обучение
   'training:intro:complete': void;

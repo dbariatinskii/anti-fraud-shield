@@ -3,13 +3,19 @@ import { EventBus } from '@/core/EventBus';
 
 /** Разрешённые переходы */
 const VALID_TRANSITIONS: Record<GameMode, GameMode[]> = {
-  [GameMode.Menu]: [GameMode.ClassicInit, GameMode.Training, GameMode.Leaderboard],
+  [GameMode.Menu]: [GameMode.ClassicInit, GameMode.Training, GameMode.Leaderboard, GameMode.DuelSetup],
   [GameMode.ClassicInit]: [GameMode.Game],
   [GameMode.Game]: [GameMode.GameOver, GameMode.Paused],
   [GameMode.Paused]: [GameMode.Game, GameMode.Menu],
   [GameMode.GameOver]: [GameMode.ClassicInit, GameMode.Menu, GameMode.Leaderboard],
   [GameMode.Training]: [GameMode.GameOver, GameMode.Menu, GameMode.ClassicInit, GameMode.Training],
   [GameMode.Leaderboard]: [GameMode.Menu],
+  // Дуэль
+  [GameMode.DuelSetup]: [GameMode.DuelRoundStart, GameMode.Menu],
+  [GameMode.DuelRoundStart]: [GameMode.DuelGame],
+  [GameMode.DuelGame]: [GameMode.DuelCompare, GameMode.DuelWinner],
+  [GameMode.DuelCompare]: [GameMode.DuelRoundStart, GameMode.DuelWinner],
+  [GameMode.DuelWinner]: [GameMode.DuelSetup, GameMode.Menu],
 };
 
 /** Конечный автомат состояний */

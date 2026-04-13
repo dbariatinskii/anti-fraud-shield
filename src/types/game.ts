@@ -7,6 +7,12 @@ export enum GameMode {
   GameOver = 'game_over',
   Training = 'training',
   Leaderboard = 'leaderboard',
+  // Дуэль
+  DuelSetup = 'duel_setup',
+  DuelRoundStart = 'duel_round',
+  DuelGame = 'duel_game',
+  DuelCompare = 'duel_compare',
+  DuelWinner = 'duel_winner',
 }
 
 /** Данные карточки (логика) */
