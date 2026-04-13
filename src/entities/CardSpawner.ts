@@ -1,0 +1,45 @@
+import { EventBus } from '@/core/EventBus';
+import { CardPool } from '@/entities/CardPool';
+import { CardGenerator } from '@/entities/CardGenerator';
+
+/** Спавнер карточек */
+export class CardSpawner {
+  private spawnTimer = 0;
+  private spawnInterval = 2.0;
+
+  constructor(
+    private eventBus: EventBus,
+    private cardPool: CardPool,
+    private generator: CardGenerator,
+  ) {}
+
+  /** Обновить (вызывается из GameLoop) */
+  update(dt: number): void {
+    this.spawnTimer += dt;
+
+    if (this.spawnTimer >= this.spawnInterval) {
+      this.spawnTimer = 0;
+      this.spawn();
+    }
+  }
+
+  /** Установить интервал спавна */
+  setSpawnInterval(interval: number): void {
+    this.spawnInterval = interval;
+  }
+
+  /** Получить текущий интервал */
+  getSpawnInterval(): number {
+    return this.spawnInterval;
+  }
+
+  /** Принудительный спавн */
+  spawn(): void {
+    const data = this.generator.generate();
+    const card = this.cardPool.acquire(data);
+
+    if (card) {
+      this.eventBus.emit('card:spawned', card);
+    }
+  }
+}
