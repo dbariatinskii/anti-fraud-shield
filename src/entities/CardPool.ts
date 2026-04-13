@@ -1,5 +1,6 @@
 import { CardElement, CardData } from '@/types/game';
 import { rng } from '@/utils/random';
+import { getIconInfo } from '@/config/icons';
 
 /** Фиксированный пул DOM-элементов карточек */
 export class CardPool {
@@ -50,9 +51,14 @@ export class CardPool {
       <span class="card__location">${data.location}</span>
     `;
 
+    // Доступность: описание иконки + сумма + локация
+    const iconInfo = getIconInfo(data.icon);
     card.element.setAttribute('tabindex', '0');
     card.element.setAttribute('role', 'button');
-    card.element.setAttribute('aria-label', `Транзакция: ${data.amount}, ${data.location}`);
+    card.element.setAttribute(
+      'aria-label',
+      `${iconInfo.label}: ${this.formatAmount(data.amount)}, ${data.location}`
+    );
 
     return card;
   }
