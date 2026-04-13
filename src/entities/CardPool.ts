@@ -21,6 +21,7 @@ export class CardPool {
         y: 0,
         speed: 0,
         active: false,
+        processed: false,
       });
     }
   }
@@ -33,6 +34,7 @@ export class CardPool {
     card.id = data.id;
     card.type = data.type;
     card.active = true;
+    card.processed = false;
     card.y = -80;
     card.speed = 100;
 
@@ -58,6 +60,7 @@ export class CardPool {
   /** Вернуть элемент в пул */
   release(card: CardElement): void {
     card.active = false;
+    card.processed = false;
     card.element.className = 'card';
     card.element.style.display = 'none';
     card.element.style.transform = '';

@@ -27,6 +27,8 @@ export interface CardElement {
   y: number;
   speed: number;
   active: boolean;
+  /** Флаг: карточка уже обработана (клик или пропуск) — защита от двойной обработки */
+  processed: boolean;
 }
 
 /** Событие очков */

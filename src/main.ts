@@ -75,7 +75,9 @@ function update(dt: number): void {
     card.y += card.speed * dt;
     card.element.style.transform = `translateY(${card.y}px)`;
 
-    if (card.y > fieldHeight - DECISION_ZONE_HEIGHT) {
+    // Пропуск: карточка достигла зоны решения и ещё не обработана
+    if (!card.processed && card.y > fieldHeight - DECISION_ZONE_HEIGHT) {
+      card.processed = true;
       eventBus.emit('card:passed', card);
     }
   }
@@ -104,6 +106,7 @@ eventBus.on('game:state', (mode) => {
     case GameMode.ClassicInit:
       scoreManager.reset();
       timer.reset();
+      isPaused = false;
       cardPool.getActive().forEach((c) => cardPool.release(c));
       stateMachine.transition(GameMode.Game);
       break;
@@ -112,6 +115,17 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.show();
+
+      // Resume из паузы или новый запуск?
+      if (isPaused) {
+        // Возобновляем paused-сессию
+        isPaused = false;
+        timer.resume();
+        inputSystem.init();
+        return;
+      }
+
+      // Полный запуск новой игры
       inputSystem.init();
       timer.start(60);
       gameLoop.start();
@@ -139,11 +153,36 @@ eventBus.on('game:state', (mode) => {
       gameOverScreen.show(result);
       break;
     }
+
+    // === Заглушки для будущих режимов ===
+    case GameMode.Training:
+      // TODO: Реализовать режим обучения (Этап 2 плана)
+      // - Фиксированная низкая скорость
+      // - Подсказки при наведении
+      // - Прогресс-бар из 20 транзакций
+      // - Финальная сводка с паттернами
+      console.warn('[TrainingMode] Not implemented yet');
+      stateMachine.transition(GameMode.Menu);
+      break;
+
+    case GameMode.Leaderboard:
+      // TODO: Реализовать таблицу рекордов (Этап 2 плана)
+      // - localStorage хранилище
+      // - Сортировка по очкам/точности
+      // - Фильтрация по периодам
+      // - Экспорт карточки результата
+      console.warn('[Leaderboard] Not implemented yet');
+      stateMachine.transition(GameMode.Menu);
+      break;
   }
 });
 
 // === Обработка событий игры ===
 eventBus.on('card:blocked', (card: CardElement) => {
+  // Защита от двойной обработки (если карточка уже ушла в decision zone)
+  if (card.processed) return;
+  card.processed = true;
+
   const rect = card.element.getBoundingClientRect();
   const fieldRect = gameField.getBoundingClientRect();
 
@@ -166,6 +205,9 @@ eventBus.on('card:blocked', (card: CardElement) => {
 });
 
 eventBus.on('card:passed', (card: CardElement) => {
+  // Дополнительная защита: если уже обработана кликом — пропускаем
+  if (card.processed) return;
+
   if (card.type === 'risk') {
     flashScreen('error');
   }

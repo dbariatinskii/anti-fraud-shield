@@ -23,6 +23,11 @@ export class CardSpawner {
     }
   }
 
+  /** Проверить, есть ли свободные слоты в пуле */
+  private hasAvailableSlot(): boolean {
+    return this.cardPool.getActive().length < 20; // POOL_SIZE = 20
+  }
+
   /** Установить интервал спавна */
   setSpawnInterval(interval: number): void {
     this.spawnInterval = interval;
@@ -35,6 +40,9 @@ export class CardSpawner {
 
   /** Принудительный спавн */
   spawn(): void {
+    // Не генерировать карточку если пул исчерпан — экономим ресурсы
+    if (!this.hasAvailableSlot()) return;
+
     const data = this.generator.generate();
     const card = this.cardPool.acquire(data);
 
