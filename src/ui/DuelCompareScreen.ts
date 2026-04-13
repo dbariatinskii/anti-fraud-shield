@@ -5,6 +5,7 @@ import { DuelPlayerResult } from '@/types/duel';
 export class DuelCompareScreen {
   private element!: HTMLElement;
   private container: HTMLElement;
+  private seriesOver = false;
 
   constructor(
     private stateMachine: GameStateMachine,
@@ -35,16 +36,22 @@ export class DuelCompareScreen {
   private bindEvents(): void {
     this.element.querySelector('#dc-next')?.addEventListener('click', () => {
       this.hide();
-      this.stateMachine.transition(GameMode.DuelRoundStart);
+      // Если серия завершена — показать победителя, иначе — следующий раунд
+      if (this.seriesOver) {
+        this.stateMachine.transition(GameMode.DuelWinner);
+      } else {
+        this.stateMachine.transition(GameMode.DuelRoundStart);
+      }
     });
   }
 
-  show(p1: DuelPlayerResult, p2: DuelPlayerResult): void {
+  show(p1: DuelPlayerResult, p2: DuelPlayerResult, seriesOver: boolean = false): void {
+    this.seriesOver = seriesOver;
     const grid = this.element.querySelector('#dc-grid')!;
     const rows = [
       { label: 'Очки', v1: p1.score, v2: p2.score, raw1: p1.score, raw2: p2.score },
       { label: 'Точность', v1: `${Math.round(p1.accuracy)}%`, v2: `${Math.round(p2.accuracy)}%`, raw1: p1.accuracy, raw2: p2.accuracy },
-      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.missedRisks, lower: true, raw1: p1.missedRisks, raw2: p2.missedRisks },
+      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.missedRisks, raw1: p1.missedRisks, raw2: p2.missedRisks, lower: true },
     ];
 
     grid.innerHTML = `

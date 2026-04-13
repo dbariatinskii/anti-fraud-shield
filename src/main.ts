@@ -320,15 +320,9 @@ eventBus.on('game:state', (mode) => {
         if (winner !== 0) duelManager.recordWin(winner);
 
         gameLoop.stop();
-
-        if (duelManager.isSeriesOver()) {
-          const seriesScore = duelManager.getSeriesScore();
-          const seriesWinner = seriesScore.p1 > seriesScore.p2 ? 1 : 2;
-          duelWinnerScreen.show(seriesWinner, seriesScore);
-          stateMachine.transition(GameMode.DuelWinner);
-        } else {
-          duelCompareScreen.show(p1, p2);
-        }
+        
+        // Всегда сначала показываем сравнение
+        duelCompareScreen.show(p1, p2, duelManager.isSeriesOver());
       } else {
         // Игрок 1 закончил, переход к Игроку 2
         duelManager.nextRound();
@@ -420,20 +414,14 @@ eventBus.on('shield:changed', ({ value }) => {
         duelManager.nextRound();
         stateMachine.transition(GameMode.DuelRoundStart);
       } else {
-        // Игрок 2 проиграл — сравнить результаты
+        // Игрок 2 проиграл — показать сравнение, затем переход к победе
         const p1 = duelManager.getState().roundResults.player1!;
         const p2 = duelManager.getState().roundResults.player2!;
         const winner = duelManager.determineWinner();
         if (winner !== 0) duelManager.recordWin(winner);
         
-        if (duelManager.isSeriesOver()) {
-          const seriesScore = duelManager.getSeriesScore();
-          const seriesWinner = seriesScore.p1 > seriesScore.p2 ? 1 : 2;
-          duelWinnerScreen.show(seriesWinner, seriesScore);
-          stateMachine.transition(GameMode.DuelWinner);
-        } else {
-          duelCompareScreen.show(p1, p2);
-        }
+        // Всегда сначала показываем сравнение
+        duelCompareScreen.show(p1, p2);
       }
     } else {
       stateMachine.transition(GameMode.GameOver);
