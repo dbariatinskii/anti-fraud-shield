@@ -471,13 +471,7 @@ eventBus.on('training:intro:complete', () => {
       card.element.style.transform = `translateY(${card.y}px)`;
       card.element.style.left = `${30 + (practiceIndex % 5) * 10}%`;
       card.element.style.display = 'flex';
-
-      // Применяем цвет в зависимости от текущего состояния подсказок
-      const hintsEnabled = hintToggle.isEnabled();
-      const colorClass = hintsEnabled
-        ? `card--${data.type}`
-        : 'card--neutral';
-      card.element.className = `card ${colorClass} card--falling`;
+      // CardPool уже применит правильный цвет через hintsEnabled
       practiceIndex++;
     }
   };

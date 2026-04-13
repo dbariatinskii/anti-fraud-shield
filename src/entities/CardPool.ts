@@ -7,6 +7,12 @@ export class CardPool {
   private pool: CardElement[] = [];
   private container!: HTMLElement;
   private readonly POOL_SIZE = 40;
+  private hintsEnabled = true; // Состояние подсказок
+
+  /** Установить состояние подсказок */
+  setHintsEnabled(enabled: boolean): void {
+    this.hintsEnabled = enabled;
+  }
 
   /** Инициализировать пул DOM-элементами */
   init(container: HTMLElement): void {
@@ -39,8 +45,11 @@ export class CardPool {
     card.y = -80;
     card.speed = 100;
 
-    // По умолчанию используем нейтральный класс (будет обновлено из main.ts при событии hint:toggled)
-    card.element.className = `card card--neutral card--falling`;
+    // Применяем цвет в зависимости от текущего состояния подсказок
+    const colorClass = this.hintsEnabled
+      ? `card--${data.type}`
+      : 'card--neutral';
+    card.element.className = `card ${colorClass} card--falling`;
     card.element.dataset.cardId = data.id;
     card.element.style.display = 'flex';
     card.element.style.transform = `translateY(${card.y}px)`;
@@ -86,6 +95,8 @@ export class CardPool {
 
   /** Обновить цвет всех активных карточек */
   updateCardColors(hintsEnabled: boolean): void {
+    this.hintsEnabled = hintsEnabled;
+
     for (const card of this.pool) {
       if (!card.active) continue;
 
