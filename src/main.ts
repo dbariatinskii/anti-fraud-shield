@@ -81,31 +81,50 @@ let practiceInterval: ReturnType<typeof setInterval> | null = null;
 const gameLoop = new GameLoop(update, render);
 
 function update(dt: number): void {
-  if (!stateMachine.isRunning() || isPaused) return;
+  if (isPaused) return;
 
-  const elapsed = timer.getTotal() - timer.getRemaining();
-  const diff = difficultyEngine.update(elapsed);
-  spawner.setSpawnInterval(diff.spawnInterval);
+  const currentMode = stateMachine.getCurrent();
 
-  spawner.update(dt);
+  // Классическая игра
+  if (currentMode === GameMode.Game) {
+    const elapsed = timer.getTotal() - timer.getRemaining();
+    const diff = difficultyEngine.update(elapsed);
+    spawner.setSpawnInterval(diff.spawnInterval);
+    spawner.update(dt);
 
-  const activeCards = cardPool.getActive();
-  const fieldHeight = gameField.clientHeight;
+    const activeCards = cardPool.getActive();
+    const fieldHeight = gameField.clientHeight;
 
-  for (const card of activeCards) {
-    card.speed = diff.fallSpeed;
-    card.y += card.speed * dt;
-    card.element.style.transform = `translateY(${card.y}px)`;
+    for (const card of activeCards) {
+      card.speed = diff.fallSpeed;
+      card.y += card.speed * dt;
+      card.element.style.transform = `translateY(${card.y}px)`;
 
-    // Пропуск: карточка достигла зоны решения и ещё не обработана
-    if (!card.processed && card.y > fieldHeight - DECISION_ZONE_HEIGHT) {
-      card.processed = true;
-      eventBus.emit('card:passed', card);
+      if (!card.processed && card.y > fieldHeight - DECISION_ZONE_HEIGHT) {
+        card.processed = true;
+        eventBus.emit('card:passed', card);
+      }
     }
+
+    timer.update(dt);
+    hud.update();
   }
 
-  timer.update(dt);
-  hud.update();
+  // Обучение — карточки падают, проверяем decision zone
+  if (currentMode === GameMode.Training) {
+    const activeCards = cardPool.getActive();
+    const fieldHeight = gameField.clientHeight;
+
+    for (const card of activeCards) {
+      card.y += card.speed * dt;
+      card.element.style.transform = `translateY(${card.y}px)`;
+
+      if (!card.processed && card.y > fieldHeight - DECISION_ZONE_HEIGHT) {
+        card.processed = true;
+        eventBus.emit('card:passed', card);
+      }
+    }
+  }
 }
 
 function render(dt: number): void {
@@ -187,6 +206,7 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.hide();
+      gameLoop.start();
       trainingIntro.start(trainingScenario.getIntroSteps());
       break;
 
@@ -351,10 +371,10 @@ eventBus.on('training:complete', ({ correct, mistakes, patternStats }) => {
     clearInterval(practiceInterval);
     practiceInterval = null;
   }
-  // Убираем обработчик card:passed для обучения
   eventBus.off('card:passed', (window as any).__trainingPassHandler);
   (window as any).__trainingPassHandler = null;
 
+  gameLoop.stop();
   cardPool.getActive().forEach((c) => cardPool.release(c));
   trainingSummary.show(correct, mistakes, patternStats);
 });
