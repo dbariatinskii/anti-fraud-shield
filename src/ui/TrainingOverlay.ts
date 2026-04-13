@@ -108,6 +108,13 @@ export class TrainingOverlay {
     });
   }
 
+  /** Скрыть без отправки события (для cleanup) */
+  hide(): void {
+    this.cardContainer.removeEventListener('mouseenter', this.handleHover, true);
+    this.cardContainer.removeEventListener('mouseleave', this.handleHoverLeave, true);
+    this.element.style.display = 'none';
+  }
+
   private updateProgress(): void {
     const done = this.correct + this.mistakes;
     const pct = this.total > 0 ? (done / this.total) * 100 : 0;

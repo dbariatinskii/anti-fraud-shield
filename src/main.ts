@@ -141,6 +141,8 @@ eventBus.on('game:state', (mode) => {
       timer.reset();
       hud.hide();
       gameOverScreen.hide();
+      trainingSummary.hide();
+      trainingOverlay.hide(); // Скрыть overlay обучения без отправки события
       menuScreen.show();
       break;
 
