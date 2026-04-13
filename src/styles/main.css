@@ -547,7 +547,7 @@ html, body {
 .leaderboard-content { max-width: 500px; width: 100%; }
 .leaderboard-controls { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
 .leaderboard-filters, .leaderboard-sort { display: flex; gap: 4px; }
-.btn--sm { padding: 6px 12px; font-size: 12px; min-width: auto; min-height: auto; }
+.btn--sm { padding: 6px 12px; font-size: 12px; min-width: auto; min-height: auto; color: #000; }
 .btn--sm.active { background: var(--color-safe); color: #000; }
 .leaderboard-list { width: 100%; max-height: 300px; overflow-y: auto; margin: 16px 0; }
 .leaderboard-header {
