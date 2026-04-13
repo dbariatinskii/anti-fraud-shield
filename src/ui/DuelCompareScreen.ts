@@ -42,9 +42,9 @@ export class DuelCompareScreen {
   show(p1: DuelPlayerResult, p2: DuelPlayerResult): void {
     const grid = this.element.querySelector('#dc-grid')!;
     const rows = [
-      { label: 'Очки', v1: p1.score, v2: p2.score },
+      { label: 'Очки', v1: p1.score, v2: p2.score, raw1: p1.score, raw2: p2.score },
       { label: 'Точность', v1: `${Math.round(p1.accuracy)}%`, v2: `${Math.round(p2.accuracy)}%`, raw1: p1.accuracy, raw2: p2.accuracy },
-      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.missedRisks, lower: true },
+      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.missedRisks, lower: true, raw1: p1.missedRisks, raw2: p2.missedRisks },
     ];
 
     grid.innerHTML = `
@@ -53,10 +53,8 @@ export class DuelCompareScreen {
         <span>Игрок 2</span>
       </div>
       ${rows.map(r => {
-        const raw1 = r.raw1 ?? 0;
-        const raw2 = r.raw2 ?? 0;
-        const w1 = r.lower ? (raw1 < raw2) : (raw1 > raw2);
-        const w2 = r.lower ? (raw2 < raw1) : (raw2 > raw1);
+        const w1 = r.lower ? (r.raw1 < r.raw2) : (r.raw1 > r.raw2);
+        const w2 = r.lower ? (r.raw2 < r.raw1) : (r.raw2 > r.raw1);
         return `<div class="duel-compare-row">
           <span class="${w1 ? 'duel-compare-winner' : ''}">${r.v1}</span>
           <span class="duel-compare-label">${r.label}</span>
