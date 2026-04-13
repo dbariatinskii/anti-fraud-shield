@@ -1,4 +1,5 @@
 import { GameMode, CardElement, ScoreEvent, GameResult } from '@/types/game';
+import { LeaderboardEntry } from '@/types/leaderboard';
 
 /** Строго типизированная карта событий */
 export interface GameEvents {
@@ -26,4 +27,12 @@ export interface GameEvents {
   // Пауза
   'game:paused': void;
   'game:resumed': void;
+
+  // Обучение
+  'training:intro:complete': void;
+  'training:step': { current: number; total: number; correct: boolean };
+  'training:complete': { correct: number; mistakes: number; patternStats: Record<string, { correct: number; total: number }> };
+
+  // Лидерборд
+  'leaderboard:saved': LeaderboardEntry;
 }
