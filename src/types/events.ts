@@ -40,4 +40,7 @@ export interface GameEvents {
 
   // Лидерборд
   'leaderboard:saved': LeaderboardEntry;
+
+  // Подсказки
+  'hint:toggled': { enabled: boolean };
 }

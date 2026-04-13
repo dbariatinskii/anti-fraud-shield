@@ -12,7 +12,7 @@ import { ParticleCanvas } from '@/systems/ParticleCanvas';
 import { HUD } from '@/ui/HUD';
 import { MenuScreen } from '@/ui/MenuScreen';
 import { GameOverScreen } from '@/ui/GameOverScreen';
-import { GameMode, GameResult, CardElement } from '@/types/game';
+import { GameMode, GameResult, CardElement, CardData } from '@/types/game';
 import { transactionTemplates } from '@/config/transactions';
 import { TrainingScenario } from '@/entities/TrainingScenario';
 import { TrainingIntro } from '@/ui/TrainingIntro';
@@ -27,6 +27,7 @@ import { DuelRoundStartScreen } from '@/ui/DuelRoundStartScreen';
 import { DuelCompareScreen } from '@/ui/DuelCompareScreen';
 import { DuelWinnerScreen } from '@/ui/DuelWinnerScreen';
 import { DuelPlayerResult } from '@/types/duel';
+import { HintToggle } from '@/ui/HintToggle';
 import '@/styles/main.css';
 
 // === Инициализация DOM ===
@@ -58,6 +59,10 @@ const menuScreen = new MenuScreen(eventBus, stateMachine, uiLayer);
 const gameOverScreen = new GameOverScreen(eventBus, stateMachine, uiLayer);
 const hud = new HUD(eventBus, timer, hudLayer);
 hud.init();
+
+// === Переключатель подсказок ===
+const hintToggle = new HintToggle(eventBus);
+hintToggle.init(hudLayer);
 
 // === Обучение ===
 const trainingScenario = new TrainingScenario();
@@ -178,6 +183,7 @@ eventBus.on('game:state', (mode) => {
       isPaused = false;
       timer.reset();
       hud.hide();
+      hintToggle.hide();
       gameOverScreen.hide();
       trainingSummary.hide();
       trainingOverlay.hide(); // Скрыть overlay обучения без отправки события
@@ -202,6 +208,7 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.show();
+      hintToggle.show();
 
       if (isPaused) {
         isPaused = false;
@@ -228,6 +235,7 @@ eventBus.on('game:state', (mode) => {
       timer.reset();
       inputSystem.destroy();
       hud.hide();
+      hintToggle.hide();
 
       const state = scoreManager.getState();
       const elapsed = Math.round(timer.getTotal() - timer.getRemaining());
@@ -264,6 +272,7 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.hide();
+      hintToggle.hide();
       leaderboardScreen.show();
       break;
 
@@ -290,6 +299,7 @@ eventBus.on('game:state', (mode) => {
       menuScreen.hide();
       gameOverScreen.hide();
       hud.show();
+      hintToggle.show();
       hud.reset();
       inputSystem.init();
       scoreManager.reset();
@@ -302,7 +312,7 @@ eventBus.on('game:state', (mode) => {
 
     case GameMode.DuelCompare: {
       const state = duelManager.getState();
-      
+
       // Записать результат, если ещё не записан (из shield:changed)
       if (!state.roundResults[state.currentPlayer === 1 ? 'player1' : 'player2']) {
         const result: DuelPlayerResult = {
@@ -323,7 +333,8 @@ eventBus.on('game:state', (mode) => {
         gameLoop.stop();
         inputSystem.destroy();
         hud.hide();
-        
+        hintToggle.hide();
+
         duelCompareScreen.show(p1, p2, duelManager, () => duelManager.nextRound());
       } else {
         // Только Игрок 1 сыграл — показать его результат vs "—"
@@ -332,7 +343,8 @@ eventBus.on('game:state', (mode) => {
         gameLoop.stop();
         inputSystem.destroy();
         hud.hide();
-        
+        hintToggle.hide();
+
         duelCompareScreen.show(p1, null, duelManager, () => duelManager.nextRound());
       }
       break;
@@ -342,7 +354,8 @@ eventBus.on('game:state', (mode) => {
       gameLoop.stop();
       inputSystem.destroy();
       hud.hide();
-      
+      hintToggle.hide();
+
       const seriesScore = duelManager.getSeriesScore();
       const seriesWinner = seriesScore.p1 > seriesScore.p2 ? 1 : 2;
       duelWinnerScreen.show(seriesWinner, seriesScore);
@@ -427,6 +440,12 @@ eventBus.on('game:paused', () => {
   stateMachine.transition(GameMode.Paused);
 });
 
+// === Переключатель подсказок ===
+eventBus.on('hint:toggled', ({ enabled }) => {
+  // Обновляем цвет всех активных карточек
+  cardPool.updateCardColors(enabled);
+});
+
 // === Вспомогательные ===
 function flashScreen(type: 'error' | 'success'): void {
   const flash = document.createElement('div');
@@ -452,7 +471,13 @@ eventBus.on('training:intro:complete', () => {
       card.element.style.transform = `translateY(${card.y}px)`;
       card.element.style.left = `${30 + (practiceIndex % 5) * 10}%`;
       card.element.style.display = 'flex';
-      card.element.className = `card card--${data.type} card--falling`;
+
+      // Применяем цвет в зависимости от текущего состояния подсказок
+      const hintsEnabled = hintToggle.isEnabled();
+      const colorClass = hintsEnabled
+        ? `card--${data.type}`
+        : 'card--neutral';
+      card.element.className = `card ${colorClass} card--falling`;
       practiceIndex++;
     }
   };

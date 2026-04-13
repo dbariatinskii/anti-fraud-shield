@@ -39,7 +39,8 @@ export class CardPool {
     card.y = -80;
     card.speed = 100;
 
-    card.element.className = `card card--${data.type} card--falling`;
+    // По умолчанию используем нейтральный класс (будет обновлено из main.ts при событии hint:toggled)
+    card.element.className = `card card--neutral card--falling`;
     card.element.dataset.cardId = data.id;
     card.element.style.display = 'flex';
     card.element.style.transform = `translateY(${card.y}px)`;
@@ -81,6 +82,23 @@ export class CardPool {
   /** Найти карточку по ID */
   findById(id: string): CardElement | undefined {
     return this.pool.find((c) => c.id === id && c.active);
+  }
+
+  /** Обновить цвет всех активных карточек */
+  updateCardColors(hintsEnabled: boolean): void {
+    for (const card of this.pool) {
+      if (!card.active) continue;
+
+      // Удаляем все цветовые классы
+      card.element.classList.remove('card--risk', 'card--norm', 'card--neutral');
+
+      // Применяем нужный класс
+      if (hintsEnabled) {
+        card.element.classList.add(card.type === 'risk' ? 'card--risk' : 'card--norm');
+      } else {
+        card.element.classList.add('card--neutral');
+      }
+    }
   }
 
   // --- Private ---
