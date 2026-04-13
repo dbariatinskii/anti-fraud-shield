@@ -412,3 +412,23 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
+/* ===== Кнопка паузы в HUD ===== */
+.hud__pause-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-light);
+  border: none;
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.hud__pause-btn:hover {
+  background: var(--color-neutral);
+}
