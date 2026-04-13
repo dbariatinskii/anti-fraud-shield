@@ -138,6 +138,31 @@ function update(dt: number): void {
       }
     }
   }
+
+  // Дуэль — аналогично классической игре
+  if (currentMode === GameMode.DuelGame) {
+    const elapsed = timer.getTotal() - timer.getRemaining();
+    const diff = difficultyEngine.update(elapsed);
+    spawner.setSpawnInterval(diff.spawnInterval);
+    spawner.update(dt);
+
+    const activeCards = cardPool.getActive();
+    const fieldHeight = gameField.clientHeight;
+
+    for (const card of activeCards) {
+      card.speed = diff.fallSpeed;
+      card.y += card.speed * dt;
+      card.element.style.transform = `translateY(${card.y}px)`;
+
+      if (!card.processed && card.y > fieldHeight - DECISION_ZONE_HEIGHT) {
+        card.processed = true;
+        eventBus.emit('card:passed', card);
+      }
+    }
+
+    timer.update(dt);
+    hud.update();
+  }
 }
 
 function render(dt: number): void {
