@@ -2,29 +2,25 @@ import { EventBus } from '@/core/EventBus';
 
 /**
  * Переключатель подсказок (цвет карточек).
+ * Управляет кнопкой внутри HUD (id="hud-hint-btn").
  * Когда включён — карточки цветные (как сейчас), когда выключен — серые.
- * Управляется через кнопку в HUD.
  */
 export class HintToggle {
   private enabled = true; // По умолчанию подсказки включены
-  private button!: HTMLElement;
+  private button: HTMLElement | null = null;
 
   constructor(
     private eventBus: EventBus,
   ) {}
 
-  /** Инициализировать DOM кнопку */
-  init(container: HTMLElement): void {
-    this.button = document.createElement('button');
-    this.button.className = 'hud__hint-btn';
-    this.button.setAttribute('aria-label', 'Подсказки');
-    this.updateButton();
+  /** Привязать к кнопке HUD */
+  init(hud: { getHintButton: () => HTMLElement | null }): void {
+    this.button = hud.getHintButton();
+    if (!this.button) return;
 
     this.button.addEventListener('click', () => {
       this.toggle();
     });
-
-    container.appendChild(this.button);
   }
 
   /** Переключить состояние */
@@ -41,17 +37,19 @@ export class HintToggle {
 
   /** Скрыть кнопку (вне игры) */
   hide(): void {
-    this.button.style.display = 'none';
+    if (this.button) this.button.style.display = 'none';
   }
 
   /** Показать кнопку (в игре) */
   show(): void {
-    this.button.style.display = 'flex';
+    if (this.button) this.button.style.display = 'flex';
   }
 
   // --- Private ---
 
   private updateButton(): void {
+    if (!this.button) return;
+
     if (this.enabled) {
       this.button.textContent = '💡';
       this.button.classList.add('active');

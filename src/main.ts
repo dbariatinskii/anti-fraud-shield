@@ -62,7 +62,7 @@ hud.init();
 
 // === Переключатель подсказок ===
 const hintToggle = new HintToggle(eventBus);
-hintToggle.init(hudLayer);
+hintToggle.init(hud);
 
 // === Обучение ===
 const trainingScenario = new TrainingScenario();

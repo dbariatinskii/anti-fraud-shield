@@ -38,6 +38,7 @@ export class HUD {
           </svg>
           <span class="hud__timer-text" id="hud-timer-text">60</span>
         </div>
+        <button class="hud__hint-btn active" id="hud-hint-btn" aria-label="Подсказки">💡</button>
         <button class="hud__pause-btn" id="hud-pause-btn" aria-label="Пауза">⏸</button>
       </div>
     `;
@@ -53,6 +54,11 @@ export class HUD {
     this.element.querySelector('#hud-pause-btn')?.addEventListener('click', () => {
       this.eventBus.emit('game:paused', undefined as void);
     });
+  }
+
+  /** Получить кнопку подсказок */
+  getHintButton(): HTMLElement | null {
+    return this.element.querySelector('#hud-hint-btn');
   }
 
   /** Показать HUD */
