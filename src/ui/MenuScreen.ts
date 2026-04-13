@@ -28,6 +28,7 @@ export class MenuScreen {
           <button class="btn btn--primary" id="btn-classic">🏆 Классика</button>
           <button class="btn btn--secondary" id="btn-training">🔰 Обучение</button>
           <button class="btn btn--secondary" id="btn-leaderboard">📊 Рекорды</button>
+          <button class="btn btn--secondary" id="btn-duel">⚔️ Дуэль</button>
         </div>
       </div>
     `;
@@ -47,6 +48,10 @@ export class MenuScreen {
 
     this.element.querySelector('#btn-leaderboard')?.addEventListener('click', () => {
       this.stateMachine.transition(GameMode.Leaderboard);
+    });
+
+    this.element.querySelector('#btn-duel')?.addEventListener('click', () => {
+      this.stateMachine.transition(GameMode.DuelSetup);
     });
   }
 

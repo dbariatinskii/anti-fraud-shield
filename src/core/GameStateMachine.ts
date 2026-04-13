@@ -12,9 +12,9 @@ const VALID_TRANSITIONS: Record<GameMode, GameMode[]> = {
   [GameMode.Leaderboard]: [GameMode.Menu],
   // Дуэль
   [GameMode.DuelSetup]: [GameMode.DuelRoundStart, GameMode.Menu],
-  [GameMode.DuelRoundStart]: [GameMode.DuelGame],
-  [GameMode.DuelGame]: [GameMode.DuelCompare, GameMode.DuelWinner],
-  [GameMode.DuelCompare]: [GameMode.DuelRoundStart, GameMode.DuelWinner],
+  [GameMode.DuelRoundStart]: [GameMode.DuelGame, GameMode.Menu],
+  [GameMode.DuelGame]: [GameMode.DuelCompare, GameMode.Paused],
+  [GameMode.DuelCompare]: [GameMode.DuelRoundStart, GameMode.DuelWinner, GameMode.Menu],
   [GameMode.DuelWinner]: [GameMode.DuelSetup, GameMode.Menu],
 };
 
