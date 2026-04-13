@@ -296,6 +296,7 @@ eventBus.on('game:state', (mode) => {
     }
 
     case GameMode.DuelCompare: {
+      gameLoop.stop();
       inputSystem.destroy();
       hud.hide();
       const state = duelManager.getState();
