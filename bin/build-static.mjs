@@ -66,7 +66,7 @@ try {
       const jsPath = resolve(STATIC_DIR, filename);
       try {
         const js = readFileSync(jsPath, 'utf-8');
-        return `<script>\n${js}\n<\/script>`;
+        return `<script>\n${js}\n</script>`;
       } catch {
         console.warn(`⚠️  JS файл не найден: ${jsPath}`);
         return _match;
