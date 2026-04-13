@@ -50,8 +50,8 @@ export class DuelCompareScreen {
     const grid = this.element.querySelector('#dc-grid')!;
     const rows = [
       { label: 'Очки', v1: p1.score, v2: p2.score, raw1: p1.score, raw2: p2.score },
-      { label: 'Точность', v1: `${Math.round(p1.accuracy)}%`, v2: `${Math.round(p2.accuracy)}%`, raw1: p1.accuracy, raw2: p2.accuracy },
-      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.missedRisks, raw1: p1.missedRisks, raw2: p2.missedRisks, lower: true },
+      { label: 'Точность', v1: `${Math.round(p1.accuracy)}%`, v2: p2.score === 0 && p1.score > 0 ? '—' : `${Math.round(p2.accuracy)}%`, raw1: p1.accuracy, raw2: p2.accuracy },
+      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.score === 0 && p1.score > 0 ? '—' : p2.missedRisks, raw1: p1.missedRisks, raw2: p2.missedRisks, lower: true },
     ];
 
     grid.innerHTML = `
