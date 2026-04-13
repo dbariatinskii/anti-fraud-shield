@@ -1,0 +1,274 @@
+/* ===== CSS Custom Properties ===== */
+:root {
+  /* Цвета */
+  --color-safe: #22c55e;
+  --color-risk: #ef4444;
+  --color-neutral: #64748b;
+  --color-warning: #f59e0b;
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-light: #334155;
+  --color-text: #f8fafc;
+  --color-text-dim: #94a3b8;
+
+  /* Размеры */
+  --spacing-unit: 8px;
+  --touch-target: 44px;
+  --card-radius: 12px;
+  --card-width: 120px;
+  --card-height: 80px;
+
+  /* Анимации */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
+  }
+}
+
+/* ===== Базовые стили ===== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Слои ===== */
+#ui-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+#ui-layer > * {
+  pointer-events: auto;
+}
+
+#game-field {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+}
+
+#card-container {
+  position: absolute;
+  inset: 0;
+  contain: layout style paint;
+}
+
+#particle-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+#hud-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: var(--spacing-unit);
+  background: rgba(15, 23, 42, 0.1);
+  display: none; /* Скрыт вне игры */
+}
+
+#hud-layer.visible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== Карточки ===== */
+.card {
+  position: absolute;
+  width: var(--card-width);
+  height: var(--card-height);
+  border-radius: var(--card-radius);
+  background: var(--color-surface);
+  border: 2px solid var(--color-neutral);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  will-change: transform;
+  touch-action: manipulation;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--color-warning);
+  outline-offset: 2px;
+}
+
+.card--risk {
+  border-color: var(--color-risk);
+}
+
+.card--norm {
+  border-color: var(--color-safe);
+}
+
+.card--falling {
+  will-change: transform;
+}
+
+.card--blocked {
+  animation: cardDissolve var(--transition-normal) forwards;
+}
+
+.card--error {
+  animation: cardShake var(--transition-fast);
+}
+
+.card--passed {
+  animation: cardFadeDown var(--transition-normal) forwards;
+}
+
+.card__icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.card__amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.card__location {
+  font-size: 10px;
+  color: var(--color-text-dim);
+}
+
+/* ===== Кнопки ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  padding: 12px 24px;
+  border-radius: var(--card-radius);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  background: var(--color-safe);
+  color: #000;
+}
+
+.btn--secondary {
+  background: var(--color-surface-light);
+}
+
+.btn--danger {
+  background: var(--color-risk);
+}
+
+/* ===== Анимации ===== */
+@keyframes cardDissolve {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.5); }
+}
+
+@keyframes cardShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes cardFadeDown {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes screenFlash {
+  0% { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+
+/* ===== Зона решения ===== */
+.decision-zone {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to top, rgba(239, 68, 68, 0.15), transparent);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ===== Экран ошибки (красная вспышка) ===== */
+.error-flash {
+  position: fixed;
+  inset: 0;
+  background: var(--color-risk);
+  z-index: 200;
+  pointer-events: none;
+  animation: screenFlash var(--transition-normal) forwards;
+}
+
+/* ===== Экран успеха (зелёная вспышка) ===== */
+.success-flash {
+  position: fixed;
+  inset: 0;
+  background: var(--color-safe);
+  z-index: 200;
+  pointer-events: none;
+  animation: screenFlash var(--transition-normal) forwards;
+}
