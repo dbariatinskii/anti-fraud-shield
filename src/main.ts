@@ -399,7 +399,12 @@ eventBus.on('timer:expired', () => {
 
 eventBus.on('shield:changed', ({ value }) => {
   if (value <= 0) {
-    stateMachine.transition(GameMode.GameOver);
+    const mode = stateMachine.getCurrent();
+    if (mode === GameMode.DuelGame) {
+      stateMachine.transition(GameMode.DuelCompare);
+    } else {
+      stateMachine.transition(GameMode.GameOver);
+    }
   }
 });
 
