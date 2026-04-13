@@ -21,6 +21,12 @@ import { TrainingSummary } from '@/ui/TrainingSummary';
 import { Leaderboard } from '@/systems/Leaderboard';
 import { LeaderboardScreen } from '@/ui/LeaderboardScreen';
 import { PauseOverlay } from '@/core/PauseOverlay';
+import { DuelManager } from '@/systems/DuelManager';
+import { DuelSetupScreen } from '@/ui/DuelSetupScreen';
+import { DuelRoundStartScreen } from '@/ui/DuelRoundStartScreen';
+import { DuelCompareScreen } from '@/ui/DuelCompareScreen';
+import { DuelWinnerScreen } from '@/ui/DuelWinnerScreen';
+import { DuelPlayerResult } from '@/types/duel';
 import '@/styles/main.css';
 
 // === Инициализация DOM ===
@@ -62,6 +68,13 @@ const trainingSummary = new TrainingSummary(eventBus, stateMachine, uiLayer);
 // === Лидерборд ===
 const leaderboard = new Leaderboard();
 const leaderboardScreen = new LeaderboardScreen(eventBus, stateMachine, leaderboard, uiLayer);
+
+// === Дуэль ===
+const duelManager = new DuelManager();
+const duelSetupScreen = new DuelSetupScreen(stateMachine, uiLayer);
+const duelRoundStartScreen = new DuelRoundStartScreen(stateMachine, uiLayer);
+const duelCompareScreen = new DuelCompareScreen(stateMachine, uiLayer);
+const duelWinnerScreen = new DuelWinnerScreen(stateMachine, uiLayer);
 
 // === Пауза ===
 const pauseOverlay = new PauseOverlay(eventBus, stateMachine, uiLayer);
@@ -226,6 +239,71 @@ eventBus.on('game:state', (mode) => {
       gameOverScreen.hide();
       hud.hide();
       leaderboardScreen.show();
+      break;
+
+    case GameMode.DuelSetup:
+      menuScreen.hide();
+      gameOverScreen.hide();
+      hud.hide();
+      duelSetupScreen.show();
+      break;
+
+    case GameMode.DuelRoundStart: {
+      const bestOf = (window as any).__duelBestOf || 3;
+      if (duelManager.getState().currentRound === 1 && duelManager.getState().currentPlayer === 1) {
+        duelManager.init(bestOf);
+      }
+      const state = duelManager.getState();
+      duelRoundStartScreen.show(state.currentPlayer, state.currentRound, duelManager.getSeriesScore());
+      break;
+    }
+
+    case GameMode.DuelGame: {
+      const state = duelManager.getState();
+      menuScreen.hide();
+      gameOverScreen.hide();
+      hud.show();
+      scoreManager.reset();
+      timer.start(60);
+      gameLoop.start();
+      break;
+    }
+
+    case GameMode.DuelCompare: {
+      const state = duelManager.getState();
+      const result: DuelPlayerResult = {
+        score: scoreManager.getState().score,
+        accuracy: scoreManager.getState().accuracy,
+        missedRisks: scoreManager.getMissedRisks(),
+      };
+      duelManager.recordResult(state.currentPlayer, result);
+
+      if (state.currentPlayer === 2) {
+        // Оба игрока сыграли — определить победителя раунда
+        const p1 = duelManager.getState().roundResults.player1!;
+        const p2 = duelManager.getState().roundResults.player2!;
+        const winner = duelManager.determineWinner();
+        if (winner !== 0) duelManager.recordWin(winner);
+
+        gameLoop.stop();
+
+        if (duelManager.isSeriesOver()) {
+          const seriesScore = duelManager.getSeriesScore();
+          const seriesWinner = seriesScore.p1 > seriesScore.p2 ? 1 : 2;
+          duelWinnerScreen.show(seriesWinner, seriesScore);
+          stateMachine.transition(GameMode.DuelWinner);
+        } else {
+          duelCompareScreen.show(p1, p2);
+        }
+      } else {
+        // Игрок 1 закончил, переход к Игроку 2
+        duelManager.nextRound();
+        stateMachine.transition(GameMode.DuelRoundStart);
+      }
+      break;
+    }
+
+    case GameMode.DuelWinner:
       break;
   }
 });

@@ -8,6 +8,7 @@ export class ScoreManager {
   private shield = 100;
   private correctActions = 0;
   private totalActions = 0;
+  private missedRisks = 0; // Количество пропущенных рисков (risk-карточки, которые прошли мимо)
 
   constructor(
     private eventBus: EventBus,
@@ -33,6 +34,12 @@ export class ScoreManager {
     this.shield = 100;
     this.correctActions = 0;
     this.totalActions = 0;
+    this.missedRisks = 0;
+  }
+
+  /** Получить количество пропущенных рисков */
+  getMissedRisks(): number {
+    return this.missedRisks;
   }
 
   // --- Private ---
@@ -67,6 +74,7 @@ export class ScoreManager {
         this.score += 5;
         this.eventBus.emit('game:score', { correct: true, points: 5, cardType: 'norm' });
       } else {
+        this.missedRisks++;
         this.shield = Math.max(0, this.shield - 20);
         this.eventBus.emit('game:score', { correct: false, points: 0, cardType: 'risk' });
       }
