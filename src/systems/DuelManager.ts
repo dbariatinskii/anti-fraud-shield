@@ -5,7 +5,7 @@ import { DuelPlayerResult, DuelState } from '@/types/duel';
  * Отвечает за переключение игроков, подсчёт побед и определение победителя раунда.
  */
 export class DuelManager {
-  private state: DuelState;
+  private state!: DuelState;
 
   constructor() {
     this.reset();
