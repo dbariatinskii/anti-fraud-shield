@@ -6,6 +6,7 @@ export class DuelCompareScreen {
   private element!: HTMLElement;
   private container: HTMLElement;
   private seriesOver = false;
+  private onNext?: () => void;
 
   constructor(
     private stateMachine: GameStateMachine,
@@ -36,6 +37,7 @@ export class DuelCompareScreen {
   private bindEvents(): void {
     this.element.querySelector('#dc-next')?.addEventListener('click', () => {
       this.hide();
+      this.onNext?.();
       // Если серия завершена — показать победителя, иначе — следующий раунд
       if (this.seriesOver) {
         this.stateMachine.transition(GameMode.DuelWinner);
@@ -45,13 +47,15 @@ export class DuelCompareScreen {
     });
   }
 
-  show(p1: DuelPlayerResult, p2: DuelPlayerResult, seriesOver: boolean = false): void {
+  show(p1: DuelPlayerResult, p2: DuelPlayerResult, seriesOver: boolean = false, onNext?: () => void): void {
     this.seriesOver = seriesOver;
+    this.onNext = onNext;
     const grid = this.element.querySelector('#dc-grid')!;
+    const isFirstRound = p2.score === 0 && p2.accuracy === 0 && p2.missedRisks === 0;
     const rows = [
-      { label: 'Очки', v1: p1.score, v2: p2.score, raw1: p1.score, raw2: p2.score },
-      { label: 'Точность', v1: `${Math.round(p1.accuracy)}%`, v2: p2.score === 0 && p1.score > 0 ? '—' : `${Math.round(p2.accuracy)}%`, raw1: p1.accuracy, raw2: p2.accuracy },
-      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: p2.score === 0 && p1.score > 0 ? '—' : p2.missedRisks, raw1: p1.missedRisks, raw2: p2.missedRisks, lower: true },
+      { label: 'Очки', v1: p1.score, v2: isFirstRound ? '—' : p2.score, raw1: p1.score, raw2: p2.score },
+      { label: 'Точность', v1: `${Math.round(p1.accuracy)}%`, v2: isFirstRound ? '—' : `${Math.round(p2.accuracy)}%`, raw1: p1.accuracy, raw2: p2.accuracy },
+      { label: 'Пропущенные риски', v1: p1.missedRisks, v2: isFirstRound ? '—' : p2.missedRisks, raw1: p1.missedRisks, raw2: p2.missedRisks, lower: true },
     ];
 
     grid.innerHTML = `

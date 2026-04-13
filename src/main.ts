@@ -324,13 +324,12 @@ eventBus.on('game:state', (mode) => {
         // Всегда сначала показываем сравнение
         duelCompareScreen.show(p1, p2, duelManager.isSeriesOver());
       } else {
-        // Игрок 1 закончил — показать его результат, затем ход Игрока 2
+        // Игрок 1 закончил — показать его результат, кнопка "Далее" переключит на Игрока 2
         const p1 = duelManager.getState().roundResults.player1!;
         const p2: DuelPlayerResult = { score: 0, accuracy: 0, missedRisks: 0 };
         
         gameLoop.stop();
-        duelManager.nextRound();
-        duelCompareScreen.show(p1, p2, false);
+        duelCompareScreen.show(p1, p2, false, () => duelManager.nextRound());
       }
       break;
     }
@@ -425,7 +424,7 @@ eventBus.on('shield:changed', ({ value }) => {
         if (winner !== 0) duelManager.recordWin(winner);
         
         // Всегда сначала показываем сравнение
-        duelCompareScreen.show(p1, p2);
+        duelCompareScreen.show(p1, p2, duelManager.isSeriesOver());
       }
     } else {
       stateMachine.transition(GameMode.GameOver);
