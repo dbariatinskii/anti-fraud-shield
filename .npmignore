@@ -1,0 +1,15 @@
+src/
+docs/
+dist/
+.github/
+.playwright-mcp/
+dist-single/
+vite.config.ts
+tsconfig.json
+tsconfig.*.json
+.gitignore
+.npmignore
+eslint.config.js
+.size-limit.json
+PROJECT-SUMMARY.md
+*.tsbuildinfo
