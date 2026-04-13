@@ -4,8 +4,10 @@
 
 ## Быстрый старт
 
+**Требования:** Node.js >= 18
+
 ```bash
-npx anti-fraud-shield
+npx @dbariatinskii/anti-fraud-shield
 ```
 
 Игра откроется в браузере на `http://localhost:3000`.
@@ -14,9 +16,9 @@ npx anti-fraud-shield
 
 | Команда | Описание |
 |---------|----------|
-| `npx anti-fraud-shield --port 8080` | Запуск на указанном порту |
-| `npx anti-fraud-shield --static` | Генерация single HTML файла |
-| `npx anti-fraud-shield --help` | Справка |
+| `npx @dbariatinskii/anti-fraud-shield --port 8080` | Запуск на указанном порту |
+| `npx @dbariatinskii/anti-fraud-shield --static` | Генерация single HTML файла |
+| `npx @dbariatinskii/anti-fraud-shield --help` | Справка |
 
 ## Режимы игры
 

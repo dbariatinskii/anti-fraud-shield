@@ -34,12 +34,13 @@ const port = portIdx >= 0 ? parseInt(args[portIdx + 1], 10) : 3000;
 if (helpFlag) {
   console.log(`
 Anti-Fraud Shield — браузерная мини-игра
+Требования: Node.js >= 18
 
 Использование:
-  npx anti-fraud-shield              Запуск HTTP-сервера (порт 3000)
-  npx anti-fraud-shield --port 8080  Запуск на указанном порту
-  npx anti-fraud-shield --static     Генерация single HTML файла
-  npx anti-fraud-shield --help       Показать справку
+  npx @dbariatinskii/anti-fraud-shield              Запуск HTTP-сервера (порт 3000)
+  npx @dbariatinskii/anti-fraud-shield --port 8080  Запуск на указанном порту
+  npx @dbariatinskii/anti-fraud-shield --static     Генерация single HTML файла
+  npx @dbariatinskii/anti-fraud-shield --help       Показать справку
 `);
   process.exit(0);
 }
