@@ -1,6 +1,6 @@
 {
   "name": "@dbariatinskii/anti-fraud-shield",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
   "description": "Браузерная мини-игра: симулятор оператора антифрод-мониторинга",
   "bin": {
