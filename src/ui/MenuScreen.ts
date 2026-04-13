@@ -27,6 +27,7 @@ export class MenuScreen {
         <div class="screen__actions">
           <button class="btn btn--primary" id="btn-classic">🏆 Классика</button>
           <button class="btn btn--secondary" id="btn-training">🔰 Обучение</button>
+          <button class="btn btn--secondary" id="btn-leaderboard">📊 Рекорды</button>
         </div>
       </div>
     `;
@@ -42,6 +43,10 @@ export class MenuScreen {
 
     this.element.querySelector('#btn-training')?.addEventListener('click', () => {
       this.stateMachine.transition(GameMode.Training);
+    });
+
+    this.element.querySelector('#btn-leaderboard')?.addEventListener('click', () => {
+      this.stateMachine.transition(GameMode.Leaderboard);
     });
   }
 
