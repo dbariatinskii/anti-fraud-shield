@@ -1,11 +1,12 @@
 import { GameStateMachine } from '@/core/GameStateMachine';
 import { GameMode } from '@/types/game';
 import { DuelPlayerResult } from '@/types/duel';
+import { DuelManager } from '@/systems/DuelManager';
 
 export class DuelCompareScreen {
   private element!: HTMLElement;
   private container: HTMLElement;
-  private seriesOver = false;
+  private duelManager: DuelManager | null = null;
   private onNext?: () => void;
 
   constructor(
@@ -39,7 +40,7 @@ export class DuelCompareScreen {
       this.hide();
       this.onNext?.();
       // Серия завершена → победитель, иначе → следующий раунд
-      if (this.seriesOver) {
+      if (this.duelManager?.isSeriesOver()) {
         this.stateMachine.transition(GameMode.DuelWinner);
       } else {
         this.stateMachine.transition(GameMode.DuelRoundStart);
@@ -47,8 +48,8 @@ export class DuelCompareScreen {
     });
   }
 
-  show(p1: DuelPlayerResult, p2: DuelPlayerResult | null, seriesOver: boolean = false, onNext?: () => void): void {
-    this.seriesOver = seriesOver;
+  show(p1: DuelPlayerResult, p2: DuelPlayerResult | null, duelManager: DuelManager, onNext?: () => void): void {
+    this.duelManager = duelManager;
     this.onNext = onNext;
     const grid = this.element.querySelector('#dc-grid')!;
     const isSecondPlayerPending = p2 === null;

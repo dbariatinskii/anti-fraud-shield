@@ -324,7 +324,7 @@ eventBus.on('game:state', (mode) => {
         inputSystem.destroy();
         hud.hide();
         
-        duelCompareScreen.show(p1, p2, duelManager.isSeriesOver());
+        duelCompareScreen.show(p1, p2, duelManager, () => duelManager.nextRound());
       } else {
         // Только Игрок 1 сыграл — показать его результат vs "—"
         const p1 = state.roundResults.player1!;
@@ -333,7 +333,7 @@ eventBus.on('game:state', (mode) => {
         inputSystem.destroy();
         hud.hide();
         
-        duelCompareScreen.show(p1, null, false, () => duelManager.nextRound());
+        duelCompareScreen.show(p1, null, duelManager, () => duelManager.nextRound());
       }
       break;
     }
