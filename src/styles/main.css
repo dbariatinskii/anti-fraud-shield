@@ -438,6 +438,17 @@ html, body {
   pointer-events: none;
   background: transparent;
   backdrop-filter: none;
+  z-index: 5;
+}
+
+/* Элементы внутри оверлея, которым нужны события мыши */
+.training-tooltip {
+  pointer-events: auto;
+}
+
+/* Карточки должны получать события через overlay */
+#card-container {
+  pointer-events: auto;
 }
 
 /* Инструкция на оверлее практики */

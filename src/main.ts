@@ -321,11 +321,28 @@ eventBus.on('training:intro:complete', () => {
   };
 
   cardContainer.addEventListener('click', trainingClickHandler);
+
+  // Обработка пропущенных карточек (ушли за decision zone без клика)
+  const trainingPassHandler = (card: CardElement) => {
+    // Только карточки из practiceCards (id начинается с 'p-')
+    if (!card.id.startsWith('p-')) return;
+    if (card.processed) return;
+    card.processed = true;
+
+    // В обучении: пропуск нормы = правильно, пропуск риска = ошибка
+    const isCorrect = card.type === 'norm';
+    trainingOverlay.recordStep(
+      { id: card.id, type: card.type, icon: card.type === 'risk' ? 'alert' : 'card', amount: 0, location: '', riskFactors: [] },
+      isCorrect
+    );
+  };
+
+  eventBus.on('card:passed', trainingPassHandler);
+  (window as any).__trainingPassHandler = trainingPassHandler;
 });
 
 eventBus.on('training:complete', ({ correct, mistakes, patternStats }) => {
-  // Очистка — НЕ вызываем trainingOverlay.finish() чтобы избежать рекурсии
-  // finish() уже был вызван ДО отправки события
+  // Очистка
   if (trainingClickHandler) {
     cardContainer.removeEventListener('click', trainingClickHandler);
     trainingClickHandler = null;
@@ -334,6 +351,10 @@ eventBus.on('training:complete', ({ correct, mistakes, patternStats }) => {
     clearInterval(practiceInterval);
     practiceInterval = null;
   }
+  // Убираем обработчик card:passed для обучения
+  eventBus.off('card:passed', (window as any).__trainingPassHandler);
+  (window as any).__trainingPassHandler = null;
+
   cardPool.getActive().forEach((c) => cardPool.release(c));
   trainingSummary.show(correct, mistakes, patternStats);
 });

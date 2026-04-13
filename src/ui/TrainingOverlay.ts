@@ -25,7 +25,7 @@ export class TrainingOverlay {
   private build(): void {
     this.element = document.createElement('div');
     this.element.id = 'training-overlay';
-    this.element.className = 'screen training-overlay--active';
+    this.element.className = 'training-overlay--active';
     this.element.style.display = 'none';
     this.element.innerHTML = `
       <div class="training-instruction" id="training-instruction">
@@ -88,6 +88,11 @@ export class TrainingOverlay {
       total: this.total,
       correct: wasCorrect,
     });
+
+    // Если все карточки обработаны — завершить практику
+    if (this.correct + this.mistakes >= this.total) {
+      this.finish();
+    }
   }
 
   /** Завершить практику */
