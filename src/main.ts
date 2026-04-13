@@ -376,6 +376,7 @@ eventBus.on('training:complete', ({ correct, mistakes, patternStats }) => {
 
   gameLoop.stop();
   cardPool.getActive().forEach((c) => cardPool.release(c));
+  gameOverScreen.hide(); // Гарантированно скрываем GameOver экран
   trainingSummary.show(correct, mistakes, patternStats);
 });
 
