@@ -301,35 +301,39 @@ eventBus.on('game:state', (mode) => {
     }
 
     case GameMode.DuelCompare: {
-      gameLoop.stop();
-      inputSystem.destroy();
-      hud.hide();
       const state = duelManager.getState();
-      const result: DuelPlayerResult = {
-        score: scoreManager.getState().score,
-        accuracy: scoreManager.getState().accuracy,
-        missedRisks: scoreManager.getMissedRisks(),
-      };
-      duelManager.recordResult(state.currentPlayer, result);
+      
+      // Записать результат, если ещё не записан (из shield:changed)
+      if (!state.roundResults[state.currentPlayer === 1 ? 'player1' : 'player2']) {
+        const result: DuelPlayerResult = {
+          score: scoreManager.getState().score,
+          accuracy: scoreManager.getState().accuracy,
+          missedRisks: scoreManager.getMissedRisks(),
+        };
+        duelManager.recordResult(state.currentPlayer, result);
+      }
 
       if (state.currentPlayer === 2) {
         // Оба игрока сыграли — определить победителя раунда
-        const p1 = duelManager.getState().roundResults.player1!;
-        const p2 = duelManager.getState().roundResults.player2!;
+        const p1 = state.roundResults.player1!;
+        const p2 = state.roundResults.player2!;
         const winner = duelManager.determineWinner();
         if (winner !== 0) duelManager.recordWin(winner);
 
         gameLoop.stop();
+        inputSystem.destroy();
+        hud.hide();
         
-        // Всегда сначала показываем сравнение
         duelCompareScreen.show(p1, p2, duelManager.isSeriesOver());
       } else {
-        // Игрок 1 закончил — показать его результат, кнопка "Далее" переключит на Игрока 2
-        const p1 = duelManager.getState().roundResults.player1!;
-        const p2: DuelPlayerResult = { score: 0, accuracy: 0, missedRisks: 0 };
-        
+        // Только Игрок 1 сыграл — показать его результат vs "—"
+        const p1 = state.roundResults.player1!;
+
         gameLoop.stop();
-        duelCompareScreen.show(p1, p2, false, () => duelManager.nextRound());
+        inputSystem.destroy();
+        hud.hide();
+        
+        duelCompareScreen.show(p1, null, false, () => duelManager.nextRound());
       }
       break;
     }
@@ -399,33 +403,11 @@ eventBus.on('shield:changed', ({ value }) => {
   if (value <= 0) {
     const mode = stateMachine.getCurrent();
     if (mode === GameMode.DuelGame) {
-      const state = duelManager.getState();
       gameLoop.stop();
       inputSystem.destroy();
       hud.hide();
-      
-      // Записать результат текущего игрока (0 очков если щит = 0)
-      const result: DuelPlayerResult = {
-        score: scoreManager.getState().score,
-        accuracy: scoreManager.getState().accuracy,
-        missedRisks: scoreManager.getMissedRisks(),
-      };
-      duelManager.recordResult(state.currentPlayer, result);
-      
-      if (state.currentPlayer === 1) {
-        // Игрок 1 проиграл — переход к Игроку 2
-        duelManager.nextRound();
-        stateMachine.transition(GameMode.DuelRoundStart);
-      } else {
-        // Игрок 2 проиграл — показать сравнение, затем переход к победе
-        const p1 = duelManager.getState().roundResults.player1!;
-        const p2 = duelManager.getState().roundResults.player2!;
-        const winner = duelManager.determineWinner();
-        if (winner !== 0) duelManager.recordWin(winner);
-        
-        // Всегда сначала показываем сравнение
-        duelCompareScreen.show(p1, p2, duelManager.isSeriesOver());
-      }
+      // Переходим в DuelCompare — результат запишется в кейсе
+      stateMachine.transition(GameMode.DuelCompare);
     } else {
       stateMachine.transition(GameMode.GameOver);
     }
