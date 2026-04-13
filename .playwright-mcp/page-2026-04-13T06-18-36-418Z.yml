@@ -1,6 +1,0 @@
-- generic [ref=e4]:
-  - generic [ref=e5]: 🛡️
-  - heading "Anti-Fraud Shield" [level=1] [ref=e6]
-  - generic [ref=e7]:
-    - button "🏆 Классика" [ref=e8] [cursor=pointer]
-    - button "🔰 Обучение" [ref=e9] [cursor=pointer]
