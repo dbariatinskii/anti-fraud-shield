@@ -46,8 +46,9 @@ export class ScoreManager {
 
   private subscribe(): void {
     this.eventBus.on('card:blocked', (card: CardElement) => {
-      // Работаем только в режиме классической игры
-      if (this.stateMachine.getCurrent() !== GameMode.Game) return;
+      // Работаем в классической игре ИЛИ в дуэли
+      const mode = this.stateMachine.getCurrent();
+      if (mode !== GameMode.Game && mode !== GameMode.DuelGame) return;
 
       this.totalActions++;
 
@@ -64,8 +65,9 @@ export class ScoreManager {
     });
 
     this.eventBus.on('card:passed', (card: CardElement) => {
-      // Работаем только в режиме классической игры
-      if (this.stateMachine.getCurrent() !== GameMode.Game) return;
+      // Работаем в классической игре ИЛИ в дуэли
+      const mode = this.stateMachine.getCurrent();
+      if (mode !== GameMode.Game && mode !== GameMode.DuelGame) return;
 
       this.totalActions++;
 

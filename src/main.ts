@@ -297,6 +297,7 @@ eventBus.on('game:state', (mode) => {
 
     case GameMode.DuelCompare: {
       inputSystem.destroy();
+      hud.hide();
       const state = duelManager.getState();
       const result: DuelPlayerResult = {
         score: scoreManager.getState().score,
@@ -381,7 +382,14 @@ eventBus.on('card:recycle', (card: CardElement) => {
 });
 
 eventBus.on('timer:expired', () => {
-  stateMachine.transition(GameMode.GameOver);
+  const mode = stateMachine.getCurrent();
+  if (mode === GameMode.DuelGame) {
+    // В дуэли — переход к сравнению результатов раунда
+    stateMachine.transition(GameMode.DuelCompare);
+  } else {
+    // В классике — Game Over
+    stateMachine.transition(GameMode.GameOver);
+  }
 });
 
 eventBus.on('shield:changed', ({ value }) => {
