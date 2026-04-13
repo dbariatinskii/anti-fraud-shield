@@ -338,8 +338,16 @@ eventBus.on('game:state', (mode) => {
       break;
     }
 
-    case GameMode.DuelWinner:
+    case GameMode.DuelWinner: {
+      gameLoop.stop();
+      inputSystem.destroy();
+      hud.hide();
+      
+      const seriesScore = duelManager.getSeriesScore();
+      const seriesWinner = seriesScore.p1 > seriesScore.p2 ? 1 : 2;
+      duelWinnerScreen.show(seriesWinner, seriesScore);
       break;
+    }
   }
 });
 
