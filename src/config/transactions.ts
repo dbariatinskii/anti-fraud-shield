@@ -31,7 +31,7 @@ export const transactionTemplates: TransactionTemplate[] = [
     icon: 'alert',
     type: 'risk',
     amountRange: [100_000, 1_000_000],
-    locations: ['⚠️ Неизвестный получатель'],
+    locations: ['⚠️ Неизвестный'],
     riskFactors: ['largeAmount', 'newMerchant'],
     label: 'Крупная оплата новому продавцу',
   },
