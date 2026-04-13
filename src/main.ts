@@ -41,8 +41,8 @@ const difficultyEngine = new DifficultyEngine(eventBus);
 const particleCanvas = new ParticleCanvas('particle-layer');
 
 // === UI ===
-const menuScreen = new MenuScreen(eventBus, uiLayer);
-const gameOverScreen = new GameOverScreen(eventBus, uiLayer);
+const menuScreen = new MenuScreen(eventBus, stateMachine, uiLayer);
+const gameOverScreen = new GameOverScreen(eventBus, stateMachine, uiLayer);
 const hud = new HUD(eventBus, timer, hudLayer);
 hud.init();
 
@@ -240,5 +240,6 @@ function flashScreen(type: 'error' | 'success'): void {
   setTimeout(() => flash.remove(), 400);
 }
 
-// === Запуск ===
-stateMachine.transition(GameMode.Menu);
+// === Запуск — показываем главное меню
+// GameStateMachine уже в состоянии Menu по умолчанию, просто показываем UI
+menuScreen.show();

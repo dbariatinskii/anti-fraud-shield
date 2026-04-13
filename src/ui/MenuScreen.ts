@@ -1,4 +1,5 @@
 import { EventBus } from '@/core/EventBus';
+import { GameStateMachine } from '@/core/GameStateMachine';
 import { GameMode } from '@/types/game';
 
 /** Главное меню */
@@ -8,6 +9,7 @@ export class MenuScreen {
 
   constructor(
     private eventBus: EventBus,
+    private stateMachine: GameStateMachine,
     uiLayer: HTMLElement,
   ) {
     this.container = uiLayer;
@@ -35,11 +37,11 @@ export class MenuScreen {
 
   private bindEvents(): void {
     this.element.querySelector('#btn-classic')?.addEventListener('click', () => {
-      this.eventBus.emit('game:state', GameMode.ClassicInit);
+      this.stateMachine.transition(GameMode.ClassicInit);
     });
 
     this.element.querySelector('#btn-training')?.addEventListener('click', () => {
-      this.eventBus.emit('game:state', GameMode.Training);
+      this.stateMachine.transition(GameMode.Training);
     });
   }
 

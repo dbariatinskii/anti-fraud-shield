@@ -1,4 +1,5 @@
 import { EventBus } from '@/core/EventBus';
+import { GameStateMachine } from '@/core/GameStateMachine';
 import { GameMode, GameResult } from '@/types/game';
 
 /** Экран завершения игры */
@@ -8,6 +9,7 @@ export class GameOverScreen {
 
   constructor(
     private eventBus: EventBus,
+    private stateMachine: GameStateMachine,
     uiLayer: HTMLElement,
   ) {
     this.container = uiLayer;
@@ -51,12 +53,12 @@ export class GameOverScreen {
   private bindEvents(): void {
     this.element.querySelector('#go-retry')?.addEventListener('click', () => {
       this.hide();
-      this.eventBus.emit('game:state', GameMode.ClassicInit);
+      this.stateMachine.transition(GameMode.ClassicInit);
     });
 
     this.element.querySelector('#go-menu')?.addEventListener('click', () => {
       this.hide();
-      this.eventBus.emit('game:state', GameMode.Menu);
+      this.stateMachine.transition(GameMode.Menu);
     });
   }
 

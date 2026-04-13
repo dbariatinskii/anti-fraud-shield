@@ -1,0 +1,15 @@
+[   47476ms] Error: Invalid transition: menu → game
+    at GameStateMachine.transition (http://localhost:5173/src/core/GameStateMachine.ts:29:13)
+    at http://localhost:5173/src/main.ts?t=1776061103315:82:20
+    at http://localhost:5173/src/core/EventBus.ts:24:53
+    at Set.forEach (<anonymous>)
+    at EventBus.emit (http://localhost:5173/src/core/EventBus.ts:24:32)
+    at HTMLButtonElement.<anonymous> (http://localhost:5173/src/ui/MenuScreen.ts:30:21)
+[  196613ms] TypeError: Cannot read properties of undefined (reading 'appendChild')
+    at MenuScreen.build (http://localhost:5173/src/ui/MenuScreen.ts?t=1776061312502:27:20)
+    at new MenuScreen (http://localhost:5173/src/ui/MenuScreen.ts?t=1776061312502:7:10)
+    at http://localhost:5173/src/main.ts?t=1776061312502:33:20
+[  227006ms] TypeError: Cannot read properties of undefined (reading 'appendChild')
+    at MenuScreen.build (http://localhost:5173/src/ui/MenuScreen.ts?t=1776061312502:27:20)
+    at new MenuScreen (http://localhost:5173/src/ui/MenuScreen.ts?t=1776061312502:7:10)
+    at http://localhost:5173/src/main.ts?t=1776061342897:33:20

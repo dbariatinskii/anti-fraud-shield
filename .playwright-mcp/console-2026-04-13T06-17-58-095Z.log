@@ -1,0 +1,4 @@
+[     467ms] Error: Invalid transition: menu → menu
+    at GameStateMachine.transition (http://localhost:5173/src/core/GameStateMachine.ts:29:13)
+    at http://localhost:5173/src/main.ts:177:14
+[     515ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/favicon.ico:0
