@@ -11,7 +11,7 @@
 - Опытные аналитики (тренировка, соревнование)
 - Руководители/коллеги (демонстрация сложности работы антифрод-системы)
 
-**Статус:** ✅ Реализовано 3 релиза (v0.1.0 — v0.3.0). Все основные режимы работают.
+**Статус:** ✅ 5 релизов (v0.1.0 — v0.5.0). Игра на GitHub Pages: https://dbariatinskii.github.io/anti-fraud-shield/
 
 ---
 
@@ -22,6 +22,8 @@
 | **v0.1.0** | Классический режим MVP | 17.38 KB JS |
 | **v0.2.0** | Обучение + Лидерборд + Пауза | 20.02 KB JS |
 | **v0.3.0** | Режим Дуэли (Hot-seat) | 49.29 KB JS |
+| **v0.4.0** | Переключатель подсказок (цветные/серые карточки) | 50.55 KB JS |
+| **v0.5.0** | Деплой на GitHub Pages, удаление npm-пакета | 50.55 KB JS |
 
 ---
 
@@ -29,6 +31,9 @@
 
 ```
 anti-fraud-shield/
+├── .github/
+│   └── workflows/
+│       └── release.yml             # CI/CD: lint, build, deploy, release
 ├── docs/
 │   ├── requirements.md           # Полные требования
 │   ├── requirements-ui.md        # UI-требования
@@ -37,16 +42,21 @@ anti-fraud-shield/
 │       ├── specs/                # Дизайн-доки
 │       │   ├── 2026-04-13-mvp-architecture-design.md
 │       │   ├── 2026-04-13-phase2-training-leaderboard-design.md
-│       │   └── 2026-04-13-phase3-duel-design.md
+│       │   ├── 2026-04-13-phase3-duel-design.md
+│       │   └── 2026-04-13-npx-release-design.md
 │       └── plans/                # Планы реализации
 │           ├── 2026-04-13-mvp-core-and-classic.md
 │           ├── 2026-04-13-phase2-training-leaderboard.md
-│           └── 2026-04-13-phase3-duel.md
+│           ├── 2026-04-13-phase3-duel.md
+│           └── 2026-04-13-npx-release-plan.md
 ├── src/                          # Исходный код (см. ниже)
 ├── index.html
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts
+├── vite.config.ts                # base: '/anti-fraud-shield/' для GitHub Pages
+├── eslint.config.js              # Flat Config + TS parser
+├── LICENSE                       # MIT
+├── README.md                     # Документация + ссылка на игру
 └── QWEN.md                       # Этот файл
 ```
 
@@ -71,7 +81,8 @@ anti-fraud-shield/
 | Язык | **TypeScript** (strict mode, полная типизация) |
 | Рендер | **DOM** (карточки, UI) + **Canvas API** (частицы) |
 | Хранение | **localStorage** (лидерборд) |
-| Зависимости | **0 внешних зависимостей** (нативные веб-стандарты) |
+| Зависимости (runtime) | **0** (нативные веб-стандарты) |
+| Зависимости (dev) | eslint, @typescript-eslint/parser, typescript, vite, size-limit |
 
 ---
 
@@ -106,7 +117,8 @@ src/
 │   └── DuelManager.ts       # Управление серией дуэли (best of 3)
 ├── ui/
 │   ├── MenuScreen.ts        # Главное меню (Классика, Обучение, Рекорды, Дуэль)
-│   ├── HUD.ts               # Щит, очки, круговой таймер, кнопка паузы
+│   ├── HUD.ts               # Щит, очки, круговой таймер, кнопки паузы и подсказок
+│   ├── HintToggle.ts        # Переключатель цветных/серых карточек (💡/)
 │   ├── GameOverScreen.ts    # Экран завершения с результатами
 │   ├── TrainingIntro.ts     # Автодемо (3 примера по 5 сек)
 │   ├── TrainingOverlay.ts   # Практика с подсказками + прогресс-бар
@@ -126,7 +138,7 @@ src/
 │   └── random.ts            # RNG-хелпер (pick, range, chance, shuffle)
 ├── styles/
 │   └── main.css             # CSS Custom Properties, стили всех экранов
-└── main.ts                  # Точка входа (37 модулей, интеграция всех систем)
+└── main.ts                  # Точка входа (38 модулей, интеграция всех систем)
 ```
 
 ---
@@ -145,6 +157,7 @@ src/
 | Очки + щит | Работает в Game и DuelGame | `systems/ScoreManager.ts` |
 | Лидерборд | localStorage, 50 записей, фильтры | `systems/Leaderboard.ts` |
 | Дуэль | Hot-seat, best of 3, сравнение | `systems/DuelManager.ts` |
+| Подсказки | Переключатель цветных/серых карточек | `ui/HintToggle.ts`, `entities/CardPool.ts` |
 
 ---
 
@@ -158,6 +171,7 @@ src/
 | 🔴 Красный | Риск / ошибка / критический таймер |
 | ⬇️ Нижняя граница | Точка принятия решения (40px) |
 | ⏱ Круговой таймер | 60 секунд, пульсация последние 10 сек |
+| 💡/ Подсказки | 💡 = цветные карточки,  = серые (усложнение) |
 | 📊 Прогресс-бар | Обучение: 20 сегментов (зелёный/красный) |
 
 ---
@@ -169,6 +183,7 @@ src/
 - **Пул объектов** — 40 DOM-элементов, нулевая нагрузка на GC
 - **Конечный автомат** — 12 режимов, валидация переходов, защита от недопустимых
 - **Слоистая архитектура** — DOM = карточки/UI, Canvas = эффекты, централизованный z-index
+- **Деплой** — GitHub Pages при push в main, base path '/anti-fraud-shield/' в Vite
 
 ---
 
@@ -211,17 +226,24 @@ src/
 ```bash
 npm install        # Установка зависимостей
 npm run dev        # Dev-сервер (http://localhost:5173)
-npm run build      # Сборка (dist/)
+npm run build      # Сборка (dist/) → деплой на GitHub Pages
+npm run lint       # ESLint проверка
 npm run preview    # Предпросмотр сборки
 ```
+
+### CI/CD
+
+- **Push в main** → CI (lint + build) → деплой на GitHub Pages
+- **Тег v*** → CI → создание GitHub Release
 
 ---
 
 ## 📊 Метрики проекта
 
-- **Модулей:** 37
-- **Строк кода:** ~4500 (TypeScript + CSS)
-- **Внешних зависимостей:** 0
-- **Размер бандла:** 49.29 KB JS (gzip: 12.38 KB)
-- **Коммитов:** ~80+
-- **Файлов:** 40+
+- **Модулей:** 38
+- **Строк кода:** ~4600 (TypeScript + CSS)
+- **Внешних зависимостей:** 5 (dev: eslint, @typescript-eslint/parser, typescript, vite, size-limit)
+- **Размер бандла:** 50.55 KB JS (gzip: 12.71 KB)
+- **Коммитов:** ~100+
+- **Файлов:** ~55
+- **Релизов:** 5 (v0.1.0 — v0.5.0)
