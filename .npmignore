@@ -13,3 +13,6 @@ eslint.config.js
 .size-limit.json
 PROJECT-SUMMARY.md
 *.tsbuildinfo
+
+# Исключения: файлы сборки, игнорируемые в git
+!bin/cli.js
