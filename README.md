@@ -42,14 +42,18 @@ npm run lint       # проверка кода
 
 ### Деплой
 
-Игра деплоится на GitHub Pages автоматически при создании тега:
+Игра деплоится на GitHub Pages автоматически при каждом push в `main`:
+
+```bash
+git push origin main
+```
+
+Новый релиз на GitHub создаётся тегом:
 
 ```bash
 git tag v0.5.0
-git push origin main --tags
+git push origin v0.5.0
 ```
-
-GitHub Actions собирает проект и публикует на `https://dbariatinskii.github.io/anti-fraud-shield/`
 
 ## Стек
 
