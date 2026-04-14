@@ -2,23 +2,11 @@
 
 Браузерная мини-игра: симулятор работы оператора антифрод-мониторинга. Классифицируйте банковские транзакции в реальном времени — блокируйте мошеннические и пропускайте легитимные.
 
-## Быстрый старт
+## Играть
 
-**Требования:** Node.js >= 18
+**[Открыть игру в браузере](https://dbariatinskii.github.io/anti-fraud-shield/)**
 
-```bash
-npx @dbariatinskii/anti-fraud-shield
-```
-
-Игра откроется в браузере на `http://localhost:3000`.
-
-### Опции
-
-| Команда | Описание |
-|---------|----------|
-| `npx @dbariatinskii/anti-fraud-shield --port 8080` | Запуск на указанном порту |
-| `npx @dbariatinskii/anti-fraud-shield --static` | Генерация single HTML файла |
-| `npx @dbariatinskii/anti-fraud-shield --help` | Справка |
+> Требуется современный браузер (Chrome, Firefox, Safari, Edge)
 
 ## Режимы игры
 
@@ -48,33 +36,26 @@ git clone https://github.com/dbariatinskii/anti-fraud-shield.git
 cd anti-fraud-shield
 npm install
 npm run dev        # dev-сервер с HMR
-npm run build      # сборка в static/
+npm run build      # сборка в dist/
 npm run lint       # проверка кода
 ```
+
+### Деплой
+
+Игра деплоится на GitHub Pages автоматически при создании тега:
+
+```bash
+git tag v0.5.0
+git push origin main --tags
+```
+
+GitHub Actions собирает проект и публикует на `https://dbariatinskii.github.io/anti-fraud-shield/`
 
 ## Стек
 
 - TypeScript + Vite
 - Canvas API (частицы) + DOM (карточки)
-- 0 внешних зависимостей в рантайме игры
-
-## Публикация
-
-Для публикации нового релиза:
-
-```bash
-# Обновите версию в package.json
-npm version 0.4.0
-
-# Создайте тег и запуште
-git push origin main --tags
-```
-
-GitHub Actions автоматически:
-1. Проверит код (lint + build + size)
-2. Сгенерирует CHANGELOG.md
-3. Опубликует пакет на GitHub Packages
-4. Создаст GitHub Release
+- 0 внешних зависимостей в рантайме
 
 ## Лицензия
 

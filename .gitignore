@@ -3,8 +3,3 @@ dist/
 *.tsbuildinfo
 .playwright-mcp/
 PROJECT-SUMMARY.md
-
-# Release artifacts
-static/
-dist-single/
-bin/cli.js
